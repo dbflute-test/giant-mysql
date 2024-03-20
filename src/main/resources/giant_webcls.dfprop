@@ -1,0 +1,31 @@
+# /---------------------------------------------------------------------------
+# appcls: (NotRequired - Default map:{})
+#
+# The definition of application classification.
+#
+# Specification:
+# map: {
+#     [classification-name] = list:{
+#         ; map:{ topComment=[comment]; codeType=[String(default) or Number or Boolean] }
+#         ; map:{ refCls=[projectName]@[DB classification name] ; refType=[included or exists or matches] }
+#         ; map:{ code=[code]; name=[name]; alias=[alias]; comment=[comment] }
+#     }
+# }
+#
+# *The line that starts with '#' means comment-out.
+#
+map:{
+    # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+    # as LastaFlute FreeGen, so generating WebCDef.java
+    # _/_/_/_/_/_/_/_/_/_/
+
+    # ====================================================================================
+    #                                                                     refCls to appcls
+    #                                                                     ================
+    # test of reference to namedcls
+    ; WebDockside = list:{
+        ; map:{ topComment=test of reference to appcls, case1 ; codeType=String }
+        ; map:{ refCls=appcls@AppDockside ; refType=included }
+    }
+}
+# ----------------/

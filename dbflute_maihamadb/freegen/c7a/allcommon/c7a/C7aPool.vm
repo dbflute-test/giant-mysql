@@ -1,0 +1,180 @@
+##
+## Copyright 2014-2018 the original author or authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+## either express or implied. See the License for the specific language
+## governing permissions and limitations under the License.
+##
+${manager.allClassCopyright}package org.dbflute.c7a;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.HostDistance;
+import com.datastax.driver.core.PoolingOptions;
+import com.datastax.driver.core.TypeCodec;
+import com.datastax.driver.core.policies.LoadBalancingPolicy;
+import com.datastax.driver.core.policies.RoundRobinPolicy;
+import com.datastax.driver.extras.codecs.MappingCodec;
+import com.datastax.driver.extras.codecs.jdk8.LocalDateCodec;
+import com.datastax.driver.extras.codecs.jdk8.LocalTimeCodec;
+import com.datastax.driver.mapping.MappingManager;
+
+/**
+ * C7aPool.
+ * @author FreeGen
+ */
+public class C7aPool {
+
+    // ===================================================================================
+    //                                                                           Attribute
+    //                                                                           =========
+    protected Cluster cluster;
+
+    protected Map<String, MappingManager> mappingManagers;
+
+    private ConsistencyLevel consistencyLevel;
+
+    private LoadBalancingPolicy loadBalancingPolicy;
+
+    private String host;
+
+    private Integer port;
+
+    private String user;
+
+    private String password;
+
+    // ===================================================================================
+    //                                                                          Definition
+    //                                                                          ==========
+    private static final int MAX_CONNECTIONS_PER_HOST_LOCAL = 1;
+    private static final int CORE_CONNECTIONS_PER_HOST_LOCAL = 1;
+    private static final int MAX_CONNECTIONS_PER_HOST_REMOTE = 1;
+    private static final int CORE_CONNECTIONS_PER_HOST_REMOTE = 1;
+    private static final int HEARTBEAT_INTERVAL_SECONDS = 800;
+    private static final int MAX_REQUEST_PER_CONNECTION_LOCAL = 32768;
+    private static final int MAX_REQUEST_PER_CONNECTION_REMOTE = 2000;
+
+    // ===================================================================================
+    //                                                                     Pool Management
+    //                                                                     ===============
+    @PostConstruct
+    public void init() {
+        // #hope #c7a pri.C p1us2er0 organize Cassandra connection settings. (2018/06/13)
+        PoolingOptions poolingOptions = new PoolingOptions() //
+                // connectionsPerHost looks good at default.
+                // https://docs.datastax.com/en/developer/java-driver/3.5/manual/pooling/
+                .setConnectionsPerHost(HostDistance.LOCAL, CORE_CONNECTIONS_PER_HOST_LOCAL, MAX_CONNECTIONS_PER_HOST_LOCAL)
+                .setConnectionsPerHost(HostDistance.REMOTE, CORE_CONNECTIONS_PER_HOST_REMOTE, MAX_CONNECTIONS_PER_HOST_REMOTE)
+                .setHeartbeatIntervalSeconds(HEARTBEAT_INTERVAL_SECONDS) // default : 30 seconds
+                .setMaxRequestsPerConnection(HostDistance.LOCAL, MAX_REQUEST_PER_CONNECTION_LOCAL)
+                .setMaxRequestsPerConnection(HostDistance.REMOTE, MAX_REQUEST_PER_CONNECTION_REMOTE);
+
+        if (this.loadBalancingPolicy == null) {
+            this.loadBalancingPolicy = new RoundRobinPolicy(); // default
+        }
+
+        cluster = Cluster.builder()
+                .addContactPoints(host.split(","))
+                .withPort(port)
+                .withPoolingOptions(poolingOptions)
+                .withCredentials(user, password)
+                // RoundRobinPolicy : This works well for simple deployments. If you have multiple datacenters, it will be inefficient and you probably want to switch to a DC-aware policy.
+                // https://docs.datastax.com/en/developer/java-driver/3.5/manual/load_balancing/
+                .withLoadBalancingPolicy(this.loadBalancingPolicy)
+                .build();
+
+        cluster.getConfiguration().getCodecRegistry().register(LocalDateCodec.instance);
+        cluster.getConfiguration().getCodecRegistry().register(LocalTimeCodec.instance);
+        cluster.getConfiguration().getCodecRegistry().register(LocalDateTimeCodec.instance);
+
+        mappingManagers = new ConcurrentHashMap<String, MappingManager>();
+        // setting the consistency level.
+        // https://docs.datastax.com/ja/cassandra-jajp/3.0/cassandra/dml/dmlConfigConsistency.html
+        // #hope #c7a pri.C p1us2er0 want to set for each table, read, write. (2018/07/24)
+        // http://oranie.hatenablog.com/entry/20130723/1374555729
+        if (this.consistencyLevel != null) {
+            cluster.getConfiguration().getQueryOptions().setConsistencyLevel(this.consistencyLevel);
+        }
+
+        // #hope #c7a pri.C p1us2er0 the first DB access (before Connection is established) after tomcat start is slow, so it may be better to select once at tomcat startup (2018/07/26)
+    }
+
+    private static class LocalDateTimeCodec extends MappingCodec<LocalDateTime, Date> {
+
+        public static final LocalDateTimeCodec instance = new LocalDateTimeCodec();
+
+        public LocalDateTimeCodec() {
+            super(TypeCodec.timestamp(), java.time.LocalDateTime.class);
+        }
+
+        @Override
+        protected LocalDateTime deserialize(Date value) {
+            if (value == null) {
+                return null;
+            }
+            return LocalDateTime.ofInstant(value.toInstant(), ZoneId.systemDefault());
+        }
+
+        @Override
+        protected Date serialize(LocalDateTime value) {
+            if (value == null) {
+                return null;
+            }
+            return Date.from(ZonedDateTime.of(value, ZoneId.systemDefault()).toInstant());
+        }
+    }
+
+    public MappingManager getResource(String keyspace) {
+        return mappingManagers.computeIfAbsent(keyspace, noKeyspaceCache -> {
+            return new MappingManager(cluster.connect(noKeyspaceCache));
+        });
+    }
+
+    @PreDestroy
+    public void destroy() {
+        cluster.close();
+    }
+
+    public void setConsistencyLevel(ConsistencyLevel level) {
+        this.consistencyLevel = level;
+    }
+
+    public void setLoadBalancingPolicy(LoadBalancingPolicy policy) {
+        this.loadBalancingPolicy = policy;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
+    public void setPort(Integer port) {
+        this.port = port;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}

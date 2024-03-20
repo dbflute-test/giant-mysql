@@ -1,0 +1,456 @@
+map:{
+    ; 2024/03/20 02:53:45.841 = map:{
+        ; diffDate = 2024/03/20 02:53:45.841
+        ; tableCount = map:{
+            ; next = 20
+            ; previous = 18
+        }
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = ADD
+            }
+            ; giant_status = map:{
+                ; tableName = giant_status
+                ; diffType = ADD
+            }
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; GIANT_STATUS_CODE = map:{
+                        ; columnName = GIANT_STATUS_CODE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING = map:{
+                        ; columnName = INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING_NULLABLE = map:{
+                        ; columnName = INDEX_STRING_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_INTEGER = map:{
+                        ; columnName = INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; INDEX_INTEGER_NULLABLE = map:{
+                        ; columnName = INDEX_INTEGER_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATE = map:{
+                        ; columnName = INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATE_NULLABLE = map:{
+                        ; columnName = INDEX_DATE_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATETIME = map:{
+                        ; columnName = INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATETIME_NULLABLE = map:{
+                        ; columnName = INDEX_DATETIME_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_BOOLEAN = map:{
+                        ; columnName = INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; INDEX_BOOLEAN_NULLABLE = map:{
+                        ; columnName = INDEX_BOOLEAN_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_STRING = map:{
+                        ; columnName = NON_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_INTEGER = map:{
+                        ; columnName = NON_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_DATE = map:{
+                        ; columnName = NON_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_DATETIME = map:{
+                        ; columnName = NON_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEXD_BOOLEAN = map:{
+                        ; columnName = NON_INDEXD_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; SELF_PARENT_ID = map:{
+                        ; columnName = SELF_PARENT_ID
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_2ND_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_2ND_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_3RD_NON_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_3RD_NON_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_4TH_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_4TH_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_STRING = map:{
+                        ; columnName = UNIQUE_STRING
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_INTEGER = map:{
+                        ; columnName = UNIQUE_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; ZONE_MEMBER_ID = map:{
+                        ; columnName = ZONE_MEMBER_ID
+                        ; diffType = ADD
+                    }
+                    ; ZONE_PURCHASE_ID = map:{
+                        ; columnName = ZONE_PURCHASE_ID
+                        ; diffType = ADD
+                    }
+                    ; ZONE_PRODUCT_ID = map:{
+                        ; columnName = ZONE_PRODUCT_ID
+                        ; diffType = ADD
+                    }
+                    ; STRING_INDEX = map:{
+                        ; columnName = STRING_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; STRING_NO_INDEX = map:{
+                        ; columnName = STRING_NO_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; STRING_UNIQUE_INDEX = map:{
+                        ; columnName = STRING_UNIQUE_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; INTFLG_INDEX = map:{
+                        ; columnName = INTFLG_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; NUMERIC_INTEGER_INDEX = map:{
+                        ; columnName = NUMERIC_INTEGER_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; NUMERIC_INTEGER_NO_INDEX = map:{
+                        ; columnName = NUMERIC_INTEGER_NO_INDEX
+                        ; diffType = DELETE
+                    }
+                }
+                ; foreignKeyDiff = map:{
+                    ; FK_GIANT_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_GIANT_STATUS
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_SELF = map:{
+                        ; constraintName = FK_GIANT_SELF
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_MEMBER = map:{
+                        ; constraintName = FK_GIANT_ZONE_MEMBER
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_PRODUCT = map:{
+                        ; constraintName = FK_GIANT_ZONE_PRODUCT
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_PURCHASE = map:{
+                        ; constraintName = FK_GIANT_ZONE_PURCHASE
+                        ; diffType = ADD
+                    }
+                }
+                ; uniqueKeyDiff = map:{
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; constraintName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_INTEGER = map:{
+                        ; constraintName = UNIQUE_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_STRING = map:{
+                        ; constraintName = UNIQUE_STRING
+                        ; diffType = ADD
+                    }
+                    ; STRING_UNIQUE_INDEX = map:{
+                        ; constraintName = STRING_UNIQUE_INDEX
+                        ; diffType = DELETE
+                    }
+                }
+                ; indexDiff = map:{
+                    ; FK_GIANT_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_GIANT_STATUS
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_SELF = map:{
+                        ; constraintName = FK_GIANT_SELF
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_MEMBER = map:{
+                        ; constraintName = FK_GIANT_ZONE_MEMBER
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_PRODUCT = map:{
+                        ; constraintName = FK_GIANT_ZONE_PRODUCT
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_ZONE_PURCHASE = map:{
+                        ; constraintName = FK_GIANT_ZONE_PURCHASE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_BOOLEAN = map:{
+                        ; constraintName = IX_GIANT_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_BOOLEAN_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_BOOLEAN_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_DATE = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_DATETIME = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_DATETIME_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATETIME_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_DATE_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATE_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_INTEGER = map:{
+                        ; constraintName = IX_GIANT_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_INTEGER_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_INTEGER_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_STRING = map:{
+                        ; constraintName = IX_GIANT_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_STRING_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_STRING_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_NUMERIC_INTEGER = map:{
+                        ; constraintName = IX_GIANT_NUMERIC_INTEGER
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_STRING = map:{
+                        ; constraintName = IX_GIANT_STRING
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; GIANT_REF_STATUS_CODE = map:{
+                        ; columnName = GIANT_REF_STATUS_CODE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING = map:{
+                        ; columnName = INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING_NULLABLE = map:{
+                        ; columnName = INDEX_STRING_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_INTEGER = map:{
+                        ; columnName = INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; INDEX_INTEGER_NULLABLE = map:{
+                        ; columnName = INDEX_INTEGER_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATE = map:{
+                        ; columnName = INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATE_NULLABLE = map:{
+                        ; columnName = INDEX_DATE_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATETIME = map:{
+                        ; columnName = INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; INDEX_DATETIME_NULLABLE = map:{
+                        ; columnName = INDEX_DATETIME_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; INDEX_BOOLEAN = map:{
+                        ; columnName = INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; INDEX_BOOLEAN_NULLABLE = map:{
+                        ; columnName = INDEX_BOOLEAN_NULLABLE
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_STRING = map:{
+                        ; columnName = NON_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_INTEGER = map:{
+                        ; columnName = NON_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_DATE = map:{
+                        ; columnName = NON_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEX_DATETIME = map:{
+                        ; columnName = NON_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEXD_BOOLEAN = map:{
+                        ; columnName = NON_INDEXD_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_2ND_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_2ND_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_3RD_NON_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_3RD_NON_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_4TH_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_4TH_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_STRING = map:{
+                        ; columnName = UNIQUE_STRING
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_INTEGER = map:{
+                        ; columnName = UNIQUE_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; ZONE_MEMBER_ID = map:{
+                        ; columnName = ZONE_MEMBER_ID
+                        ; diffType = ADD
+                    }
+                    ; ZONE_PURCHASE_ID = map:{
+                        ; columnName = ZONE_PURCHASE_ID
+                        ; diffType = ADD
+                    }
+                    ; ZONE_PRODUCT_ID = map:{
+                        ; columnName = ZONE_PRODUCT_ID
+                        ; diffType = ADD
+                    }
+                    ; DATE_INDEX = map:{
+                        ; columnName = DATE_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; DATE_NO_INDEX = map:{
+                        ; columnName = DATE_NO_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; TIMESTAMP_INDEX = map:{
+                        ; columnName = TIMESTAMP_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; TIMESTAMP_NO_INDEX = map:{
+                        ; columnName = TIMESTAMP_NO_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; NULLABLE_DECIMAL_INDEX = map:{
+                        ; columnName = NULLABLE_DECIMAL_INDEX
+                        ; diffType = DELETE
+                    }
+                    ; NULLABLE_DECIMAL_NO_INDEX = map:{
+                        ; columnName = NULLABLE_DECIMAL_NO_INDEX
+                        ; diffType = DELETE
+                    }
+                }
+                ; foreignKeyDiff = map:{
+                    ; FK_GIANT_REF_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_REF_GIANT_STATUS
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_MEMBER = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_MEMBER
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_PRODUCT = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_PRODUCT
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_PURCHASE = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_PURCHASE
+                        ; diffType = ADD
+                    }
+                }
+                ; uniqueKeyDiff = map:{
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; constraintName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_INTEGER = map:{
+                        ; constraintName = UNIQUE_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_STRING = map:{
+                        ; constraintName = UNIQUE_STRING
+                        ; diffType = ADD
+                    }
+                }
+                ; indexDiff = map:{
+                    ; FK_GIANT_REF_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_REF_GIANT_STATUS
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_MEMBER = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_MEMBER
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_PRODUCT = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_PRODUCT
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_ZONE_PURCHASE = map:{
+                        ; constraintName = FK_GIANT_REF_ZONE_PURCHASE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_REF_DATE = map:{
+                        ; constraintName = IX_GIANT_REF_DATE
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_REF_NULLABLE_DEC = map:{
+                        ; constraintName = IX_GIANT_REF_NULLABLE_DEC
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_REF_TIMESTAMP = map:{
+                        ; constraintName = IX_GIANT_REF_TIMESTAMP
+                        ; diffType = DELETE
+                    }
+                }
+            }
+        }
+    }
+}

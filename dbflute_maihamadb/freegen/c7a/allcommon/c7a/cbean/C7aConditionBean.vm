@@ -1,0 +1,93 @@
+##
+## Copyright 2014-2018 the original author or authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+## either express or implied. See the License for the specific language
+## governing permissions and limitations under the License.
+##
+${manager.allClassCopyright}package org.dbflute.c7a.cbean;
+
+import org.dbflute.c7a.entity.dbmeta.C7aDBMeta;
+import org.dbflute.optional.OptionalEntity;
+
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.Delete;
+import com.datastax.driver.core.querybuilder.Update;
+
+/**
+ * @author FreeGen
+ */
+public interface C7aConditionBean {
+
+    // ===================================================================================
+    //                                                                             DB Meta
+    //                                                                             =======
+    /**
+     * Handle the meta as DBMeta, that has all info of the table.
+     * @return The (singleton) instance of DB meta for the table. (NotNull)
+     */
+    C7aDBMeta asDBMeta();
+
+    /**
+     * Handle the meta as table DB name, that can be identity of table..
+     * @return The (fixed) DB name of the table. (NotNull)
+     */
+    String asTableDbName();
+
+    // ===================================================================================
+    //                                                                             Specify
+    //                                                                             =======
+    C7aSpecification specify();
+
+    // ===================================================================================
+    //                                                                               Query
+    //                                                                               =====
+    AbstractC7aConditionQuery query();
+
+    // ===================================================================================
+    //                                                                        Count Select
+    //                                                                        ============
+    Statement buildSelectCount();
+
+    // ===================================================================================
+    //                                                                              Select
+    //                                                                              ======
+    Statement buildSelect();
+
+    // ===================================================================================
+    //                                                                              Update
+    //                                                                              ======
+    Update buildQueryUpdate();
+
+    // ===================================================================================
+    //                                                                              Delete
+    //                                                                              ======
+    Delete buildQueryDelete();
+
+    // ===================================================================================
+    //                                                                         Query Parts
+    //                                                                         ===========
+    OptionalEntity<ConsistencyLevel> getConsistencyLevel();
+
+    int getFetchSize();
+
+    String getPagingState();
+
+    // ===================================================================================
+    //                                                                      Paging Setting
+    //                                                                      ==============
+    void enablePagingCount();
+
+    void disablePagingCount();
+
+    boolean canPagingCount();
+}

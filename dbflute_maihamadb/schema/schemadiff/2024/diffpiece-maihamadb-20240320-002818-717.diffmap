@@ -1,0 +1,20 @@
+map:{
+    ; 2024/03/20 00:28:18.717 = map:{
+        ; diffDate = 2024/03/20 00:28:18.717
+        ; tableCount = map:{
+            ; next = 18
+            ; previous = 16
+        }
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = ADD
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = ADD
+            }
+        }
+    }
+}

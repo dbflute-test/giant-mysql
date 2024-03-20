@@ -1,0 +1,188 @@
+map:{
+    ; 2024/03/20 10:19:49.887 = map:{
+        ; diffDate = 2024/03/20 10:19:49.887
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NULLABLE_INDEX_STRING = map:{
+                        ; columnName = NULLABLE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_INTEGER = map:{
+                        ; columnName = NULLABLE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATE = map:{
+                        ; columnName = NULLABLE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATETIME = map:{
+                        ; columnName = NULLABLE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_BOOLEAN = map:{
+                        ; columnName = NULLABLE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING_NULLABLE = map:{
+                        ; columnName = INDEX_STRING_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_INTEGER_NULLABLE = map:{
+                        ; columnName = INDEX_INTEGER_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATE_NULLABLE = map:{
+                        ; columnName = INDEX_DATE_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATETIME_NULLABLE = map:{
+                        ; columnName = INDEX_DATETIME_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_BOOLEAN_NULLABLE = map:{
+                        ; columnName = INDEX_BOOLEAN_NULLABLE
+                        ; diffType = DELETE
+                    }
+                }
+                ; indexDiff = map:{
+                    ; IX_GIANT_NULLABLE_INDEX_BOOLEAN = map:{
+                        ; constraintName = IX_GIANT_NULLABLE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_NULLABLE_INDEX_DATE = map:{
+                        ; constraintName = IX_GIANT_NULLABLE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_NULLABLE_INDEX_DATETIME = map:{
+                        ; constraintName = IX_GIANT_NULLABLE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_NULLABLE_INDEX_INTEGER = map:{
+                        ; constraintName = IX_GIANT_NULLABLE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_NULLABLE_INDEX_STRING = map:{
+                        ; constraintName = IX_GIANT_NULLABLE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_INDEX_BOOLEAN_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_BOOLEAN_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_INDEX_DATETIME_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATETIME_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_INDEX_DATE_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_DATE_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_INDEX_INTEGER_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_INTEGER_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; IX_GIANT_INDEX_STRING_NULLABLE = map:{
+                        ; constraintName = IX_GIANT_INDEX_STRING_NULLABLE
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NULLABLE_INDEX_STRING = map:{
+                        ; columnName = NULLABLE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_INTEGER = map:{
+                        ; columnName = NULLABLE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATE = map:{
+                        ; columnName = NULLABLE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATETIME = map:{
+                        ; columnName = NULLABLE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_BOOLEAN = map:{
+                        ; columnName = NULLABLE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING_NULLABLE = map:{
+                        ; columnName = INDEX_STRING_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_INTEGER_NULLABLE = map:{
+                        ; columnName = INDEX_INTEGER_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATE_NULLABLE = map:{
+                        ; columnName = INDEX_DATE_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATETIME_NULLABLE = map:{
+                        ; columnName = INDEX_DATETIME_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_BOOLEAN_NULLABLE = map:{
+                        ; columnName = INDEX_BOOLEAN_NULLABLE
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NULLABLE_INDEX_STRING = map:{
+                        ; columnName = NULLABLE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_INTEGER = map:{
+                        ; columnName = NULLABLE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATE = map:{
+                        ; columnName = NULLABLE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_DATETIME = map:{
+                        ; columnName = NULLABLE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; NULLABLE_INDEX_BOOLEAN = map:{
+                        ; columnName = NULLABLE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; INDEX_STRING_NULLABLE = map:{
+                        ; columnName = INDEX_STRING_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_INTEGER_NULLABLE = map:{
+                        ; columnName = INDEX_INTEGER_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATE_NULLABLE = map:{
+                        ; columnName = INDEX_DATE_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_DATETIME_NULLABLE = map:{
+                        ; columnName = INDEX_DATETIME_NULLABLE
+                        ; diffType = DELETE
+                    }
+                    ; INDEX_BOOLEAN_NULLABLE = map:{
+                        ; columnName = INDEX_BOOLEAN_NULLABLE
+                        ; diffType = DELETE
+                    }
+                }
+            }
+        }
+    }
+}

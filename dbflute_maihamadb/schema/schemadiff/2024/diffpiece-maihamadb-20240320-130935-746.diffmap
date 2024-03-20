@@ -1,0 +1,46 @@
+map:{
+    ; 2024/03/20 13:09:35.746 = map:{
+        ; diffDate = 2024/03/20 13:09:35.746
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = CHANGE
+                ; indexDiff = map:{
+                    ; IX_GIANT_UNIQUE_2ND_INTEGER = map:{
+                        ; constraintName = IX_GIANT_UNIQUE_2ND_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_UNIQUE_4TH_INTEGER = map:{
+                        ; constraintName = IX_GIANT_UNIQUE_4TH_INTEGER
+                        ; diffType = ADD
+                    }
+                }
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; indexDiff = map:{
+                    ; IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER = map:{
+                        ; constraintName = IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; FK_GIANT_REF_GIANT = map:{
+                        ; constraintName = FK_GIANT_REF_GIANT
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; indexDiff = map:{
+                    ; IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER = map:{
+                        ; constraintName = IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER
+                        ; diffType = ADD
+                    }
+                }
+            }
+        }
+    }
+}

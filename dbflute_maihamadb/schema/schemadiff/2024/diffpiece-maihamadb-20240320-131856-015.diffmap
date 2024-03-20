@@ -1,0 +1,76 @@
+map:{
+    ; 2024/03/20 13:18:56.015 = map:{
+        ; diffDate = 2024/03/20 13:18:56.015
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; GIANT_STATUS_CODE = map:{
+                        ; columnName = GIANT_STATUS_CODE
+                        ; diffType = ADD
+                    }
+                    ; GIANT_REF_STATUS_CODE = map:{
+                        ; columnName = GIANT_REF_STATUS_CODE
+                        ; diffType = DELETE
+                    }
+                }
+                ; foreignKeyDiff = map:{
+                    ; FK_GIANT_REF_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_REF_GIANT_STATUS
+                        ; diffType = CHANGE
+                        ; columnDiff = map:{
+                            ; next = GIANT_STATUS_CODE
+                            ; previous = GIANT_REF_STATUS_CODE
+                        }
+                    }
+                }
+                ; indexDiff = map:{
+                    ; FK_GIANT_REF_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_REF_GIANT_STATUS
+                        ; diffType = CHANGE
+                        ; columnDiff = map:{
+                            ; next = GIANT_STATUS_CODE
+                            ; previous = GIANT_REF_STATUS_CODE
+                        }
+                    }
+                }
+            }
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; GIANT_STATUS_CODE = map:{
+                        ; columnName = GIANT_STATUS_CODE
+                        ; diffType = ADD
+                    }
+                    ; GIANT_SIDE_STATUS_CODE = map:{
+                        ; columnName = GIANT_SIDE_STATUS_CODE
+                        ; diffType = DELETE
+                    }
+                }
+                ; foreignKeyDiff = map:{
+                    ; FK_GIANT_SIDE_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_SIDE_GIANT_STATUS
+                        ; diffType = CHANGE
+                        ; columnDiff = map:{
+                            ; next = GIANT_STATUS_CODE
+                            ; previous = GIANT_SIDE_STATUS_CODE
+                        }
+                    }
+                }
+                ; indexDiff = map:{
+                    ; FK_GIANT_SIDE_GIANT_STATUS = map:{
+                        ; constraintName = FK_GIANT_SIDE_GIANT_STATUS
+                        ; diffType = CHANGE
+                        ; columnDiff = map:{
+                            ; next = GIANT_STATUS_CODE
+                            ; previous = GIANT_SIDE_STATUS_CODE
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

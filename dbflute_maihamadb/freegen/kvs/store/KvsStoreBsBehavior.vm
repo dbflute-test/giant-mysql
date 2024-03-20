@@ -1,0 +1,335 @@
+##
+## Copyright 2014-2018 the original author or authors.
+##
+## Licensed under the Apache License, Version 2.0 (the "License");
+## you may not use this file except in compliance with the License.
+## You may obtain a copy of the License at
+##
+##     http://www.apache.org/licenses/LICENSE-2.0
+##
+## Unless required by applicable law or agreed to in writing, software
+## distributed under the License is distributed on an "AS IS" BASIS,
+## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+## either express or implied. See the License for the specific language
+## governing permissions and limitations under the License.
+##
+#set ($rule = $scriptEngine.get('kvsRule'))
+#set ($kvsKeyCount = 0)
+#foreach ($column in $data.columnList)
+#if ($column.kvsKey)
+#set ($kvsKeyCount = $kvsKeyCount + 1)
+#end
+#end
+#set ($importList = [])
+#set($added = $importList.add("${data.dbMeta.package}.${data.dbMeta.className}"))
+#set($added = $importList.add("${data.exConditionBean.package}.${data.exConditionBean.className}"))
+#set($added = $importList.add("${data.exEntity.package}.${data.exEntity.className}"))
+#set($added = $importList.add("${data.kvs.kvsStoreFacadeImpl.package}.${data.kvs.kvsStoreFacadeImpl.className}"))
+#set($added = $importList.add('java.util.function.Consumer'))
+#set($added = $importList.add('java.util.function.Supplier'))
+#set($added = $importList.add('javax.annotation.Resource'))
+#set($added = $importList.add('java.time.LocalDateTime'))
+#if ($data.ttl && $data.ttl > 0)
+#set($added = $importList.add('java.time.temporal.ChronoUnit'))
+#if ($manager.isTargetContainerSeasar())
+#set($added = $importList.add('org.dbflute.saflute.core.time.TimeManager'))
+#end
+#if ($manager.isTargetContainerLastaDi())
+#set($added = $importList.add('org.lastaflute.core.time.TimeManager'))
+#end
+#end
+#if (!$data.many)
+#set($added = $importList.add('org.dbflute.optional.OptionalEntity'))
+#end
+#set($added = $importList.add('java.util.List'))
+#if (!$data.many)
+#set($added = $importList.add('java.util.stream.Collectors'))
+#if ($kvsKeyCount == 1)
+#set($added = $importList.add('org.dbflute.util.DfCollectionUtil'))
+#end
+#end
+${manager.allClassCopyright}package ${data.package};
+#generateImports($importList, $data.package, $scriptEngine.invokeMethod($rule, 'importOrderList'))
+
+/**
+ * The behavior of (${data.comment})${data.tableName}.
+ * @author FreeGen
+ */
+public abstract class ${data.className} {
+
+#if ($data.ttl && $data.ttl > 0)
+    /** TimeManager. */
+    @Resource
+    private TimeManager timeManager;
+
+#end
+    /** $data.kvs.kvsStoreFacadeImpl.className. */
+    @Resource
+    private $data.kvs.kvsStoreFacadeImpl.className ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)};
+
+#if ($data.ttl && $data.ttl > 0)
+    /** TTL (sec) */
+    private final long TTL = ${data.ttl};
+
+#end
+    /**
+     * Handle the meta as DBMeta, that has all info of the table.
+     * @return DBMeta instance (NotNull)
+     */
+    public ${data.dbMeta.className} asDBMeta() {
+        return ${data.dbMeta.className}.getInstance();
+    }
+#if (!$data.many)
+
+    /**
+     * Select the entity by the condition-bean.<br>
+     * It returns non-null Optional entity, so you should...
+     * <ul>
+     *   <li>use alwaysPresent() if the data is always present as your business rule</li>
+     *   <li>use ifPresent() and orElse() if it might be empty</li>
+     * </ul>
+     * <pre>
+     * <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">selectEntity</span>(<span style="color: #553000">cb</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #553000">cb</span>.acceptKey(<span style="color: #553000">key</span>);
+     * }).<span style="color: #CC4747">ifPresent</span>(<span style="color: #553000">${manager.initUncap($data.tableName)}</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #3F7E5E">// Called if present</span>
+     *     ... = <span style="color: #553000">${manager.initUncap($data.tableName)}</span>.get...;
+     * }).<span style="color: #CC4747">orElse</span>(() <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #3F7E5E">// Called if not present</span>
+     *     ...
+     * });
+     * </pre>
+     * @param cbLambda The callback for condition-bean of ${data.exEntity.className}. (NotNull)
+     * @return The optional entity selected by the condition. (NotNull: if no data, empty entity)
+     */
+    public OptionalEntity<${data.exEntity.className}> selectEntity(Consumer<${data.exConditionBean.className}> cbLambda) {
+        ${data.exConditionBean.className} cb = new ${data.exConditionBean.className}();
+        cbLambda.accept(cb);
+
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateKeyColumn(cb);
+
+        return ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.findEntity(dbMeta, dbMeta.extractKeyList(cb));
+    }
+
+#foreach ($column in $data.columnList)
+#if ($kvsKeyCount == 1 && $column.kvsKey)
+    /**
+     * Select the entity List by the condition-bean.
+     * <pre>
+     * List&lt;${data.exEntity.className}&gt; ${manager.initUncap($data.exEntity.className)}List = <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">selectList</span>(<span style="color: #553000">cb</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #553000">cb</span>.query().set${column.capCamelName}_InScope(<span style="color: #553000">keyList</span>);
+     * });
+     * ${manager.initUncap($data.exEntity.className)}List.forEach(<span style="color: #553000">${manager.initUncap($data.tableName)}</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ... = <span style="color: #553000">${manager.initUncap($data.tableName)}</span>.get...;
+     * });
+     * </pre>
+     * @param cbLambda The callback for condition-bean of ${data.exEntity.className} (NotNull)
+     * @return The List of entities selected by the condition (NotNull: if no data, empty list)
+     */
+    public List<${data.exEntity.className}> selectList(Consumer<${data.exConditionBean.className}> cbLambda) {
+        ${data.exConditionBean.className} cb = new ${data.exConditionBean.className}();
+        cbLambda.accept(cb);
+
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+
+        List<List<Object>> keyListList = cb.query().xdfget${column.camelizedName}List().stream().map(value -> {
+            List<Object> keyList = DfCollectionUtil.newArrayList(value);
+            return keyList;
+        }).collect(Collectors.toList());
+
+        return ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.findEntityMap(dbMeta, keyListList)
+                .entrySet()
+                .stream()
+                .map(entry -> (${data.exEntity.className}) entry.getValue())
+                .collect(Collectors.toList());
+    }
+
+#end
+#end
+#if ($kvsKeyCount != 1)
+    /**
+     * Select the entity List by the condition-bean.
+     * <pre>
+     * List&lt;${data.exEntity.className}&gt; ${manager.initUncap($data.exEntity.className)}List = <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">selectList</span>(<span style="color: #553000">cb</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #553000">cb</span>.query().setCompoundKey_InScope(<span style="color: #553000">keyList</span>);
+     * });
+     * ${manager.initUncap($data.exEntity.className)}List.forEach(<span style="color: #553000">${manager.initUncap($data.tableName)}</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ... = <span style="color: #553000">${manager.initUncap($data.tableName)}</span>.get...;
+     * });
+     * </pre>
+     * @param cbLambda The callback for condition-bean of ${data.exEntity.className} (NotNull)
+     * @return The List of entities selected by the condition (NotNull: if no data, empty list)
+     */
+    public List<${data.exEntity.className}> selectList(Consumer<${data.exConditionBean.className}> cbLambda) {
+        ${data.exConditionBean.className} cb = new ${data.exConditionBean.className}();
+        cbLambda.accept(cb);
+
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+
+        List<List<Object>> keyListList = cb.query().xdfgetCompoundKeyList().stream().map(value -> {
+            return dbMeta.extractKeyList(value);
+        }).collect(Collectors.toList());
+
+        return ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.findEntityMap(dbMeta, keyListList)
+                .entrySet()
+                .stream()
+                .map(entry -> (${data.exEntity.className}) entry.getValue())
+                .collect(Collectors.toList());
+    }
+
+#end
+    /**
+     * Insert or update the entity.
+     * <pre>
+     * <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">insertOrUpdate</span>(() <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ${data.exEntity.className} entity = <span style="color: #70226C">new</span> ${data.exEntity.className}();
+     *     <span style="color: #3F7E5E">// Setting KVS-key(s) is required</span>
+     *     entity.setXxx(<span style="color: #553000">xxx</span>);
+     *     <span style="color: #3F7E5E">// Set other column value(s) for insert/update</span>
+     *     entity.set...;
+     *     ...
+     *     <span style="color: #70226C">return</span> entity;
+     * });
+     * </pre>
+     * @param entityLambda The handler of entity row of ${data.exEntity.className} (NotNull)
+     * @return The Entity used to insert/update with automatically-set column value (NotNull)
+     */
+    public ${data.exEntity.className} insertOrUpdate(Supplier<${data.exEntity.className}> entityLambda) {
+        ${data.exEntity.className} ${manager.initUncap($data.tableName)} = entityLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateAllColumn(${manager.initUncap($data.tableName)});
+#if ($data.ttl && $data.ttl > 0)
+        LocalDateTime expireDateTime = timeManager.currentDateTime().plus(TTL, ChronoUnit.SECONDS);
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(${manager.initUncap($data.tableName)}), ${manager.initUncap($data.tableName)}, expireDateTime);
+#else
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(${manager.initUncap($data.tableName)}), ${manager.initUncap($data.tableName)});
+#end
+        return ${manager.initUncap($data.tableName)};
+    }
+
+    /**
+     * Insert or update the entity with TTL.
+     * <pre>
+     * <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">insertOrUpdate</span>(() <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ${data.exEntity.className} entity = <span style="color: #70226C">new</span> ${data.exEntity.className}();
+     *     <span style="color: #3F7E5E">// Setting KVS-key(s) is required</span>
+     *     entity.setXxx(<span style="color: #553000">xxx</span>);
+     *     <span style="color: #3F7E5E">// Set other column value(s) for insert/update</span>
+     *     entity.set...;
+     *     ...
+     *     <span style="color: #70226C">return</span> entity;
+     * }, LocalDateTime.now().plus(<span style="color: #553000">86400000</span>, ChronoUnit.MILLIS));
+     * </pre>
+     * @param entityLambda The handler of entity row of ${data.exEntity.className} (NotNull)
+     * @param expireDateTime expire date time
+     * @return The Entity used to insert/update with automatically-set column value (NotNull)
+     */
+    public ${data.exEntity.className} insertOrUpdate(Supplier<${data.exEntity.className}> entityLambda, LocalDateTime expireDateTime) {
+        ${data.exEntity.className} ${manager.initUncap($data.tableName)} = entityLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateAllColumn(${manager.initUncap($data.tableName)});
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(${manager.initUncap($data.tableName)}), ${manager.initUncap($data.tableName)}, expireDateTime);
+
+        return ${manager.initUncap($data.tableName)};
+    }
+
+    /**
+     * Delete the entity.
+     * <pre>
+     * <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">delete</span>(() <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ${data.exEntity.className} entity = <span style="color: #70226C">new</span> ${data.exEntity.className}();
+     *     <span style="color: #3F7E5E">// Set KVS-key(s)</span>
+     *     entity.setXxx(<span style="color: #553000">xxx</span>);
+     *     <span style="color: #70226C">return</span> entity;
+     * });
+     * </pre>
+     * @param entityLambda The handler of entity row of ${data.exEntity.className} (NotNull)
+     * @return The Entity used to delete (NotNull)
+     */
+    public ${data.exEntity.className} delete(Supplier<${data.exEntity.className}> entityLambda) {
+        ${data.exEntity.className} ${manager.initUncap($data.tableName)} = entityLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateKeyColumn(${manager.initUncap($data.tableName)});
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.delete(dbMeta, dbMeta.extractKeyList(${manager.initUncap($data.tableName)}));
+
+        return ${manager.initUncap($data.tableName)};
+    }
+#else
+
+    /**
+     * Select the entity List by the condition-bean.
+     * <pre>
+     * List&lt;${data.exEntity.className}&gt; ${manager.initUncap($data.exEntity.className)}List = <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">selectList</span>(<span style="color: #553000">cb</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     <span style="color: #553000">cb</span>.query().set${column.capCamelName}_Equal(<span style="color: #553000">${column.camelName}</span>);
+     * });
+     * ${manager.initUncap($data.exEntity.className)}List.forEach(<span style="color: #553000">${manager.initUncap($data.tableName)}</span> <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ... = <span style="color: #553000">${manager.initUncap($data.tableName)}</span>.get...;
+     * });
+     * </pre>
+     * @param cbLambda The callback for condition-bean of ${data.exEntity.className} (NotNull)
+     * @return The List of entities selected by the condition (NotNull: if no data, empty list)
+     */
+    public List<${data.exEntity.className}> selectList(Consumer<${data.exConditionBean.className}> cbLambda) {
+        ${data.exConditionBean.className} cb = new ${data.exConditionBean.className}();
+        cbLambda.accept(cb);
+
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateKeyColumn(cb);
+
+        return ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.findList(dbMeta, dbMeta.extractKeyList(cb));
+    }
+
+    /**
+     * Insert or update the entity list.
+     * @param listLambda The handler of entity row of ${data.exEntity.className} list (NotNull)
+     * @return The Entity used to insert/update with automatically-set column value (NotNull)
+     */
+    public void insertOrUpdate(Supplier<List<${data.exEntity.className}>> listLambda) {
+        List<${data.exEntity.className}> list = listLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        list.forEach(entity -> dbMeta.validateAllColumn(entity));
+#if ($data.ttl && $data.ttl > 0)
+        LocalDateTime expireDateTime = timeManager.currentDateTime().plus(TTL, ChronoUnit.SECONDS);
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(list.get(0)), list, expireDateTime);
+#else
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(list.get(0)), list);
+#end
+    }
+
+    /**
+     * Insert or update the entity list with TTL.
+     * @param listLambda The handler of entity row of ${data.exEntity.className} list (NotNull)
+     * @param expireDateTime expire date time
+     * @return The Entity used to insert/update with automatically-set column value (NotNull)
+     */
+    public void insertOrUpdate(Supplier<List<${data.exEntity.className}>> listLambda, LocalDateTime expireDateTime) {
+        List<${data.exEntity.className}> list = listLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        list.forEach(entity -> dbMeta.validateAllColumn(entity));
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.insertOrUpdate(dbMeta, dbMeta.extractKeyList(list.get(0)), list, expireDateTime);
+    }
+
+    /**
+     * Delete the entity.
+     * <pre>
+     * <span style="color: #0000C0">${manager.initUncap($data.subClassName)}</span>.<span style="color: #CC4747">delete</span>(() <span style="color: #90226C; font-weight: bold"><span style="font-size: 120%">-</span>&gt;</span> {
+     *     ${data.exEntity.className} entity = <span style="color: #70226C">new</span> ${data.exEntity.className}();
+     *     <span style="color: #3F7E5E">// Set KVS-key(s)</span>
+     *     entity.setXxx(<span style="color: #553000">xxx</span>);
+     *     <span style="color: #70226C">return</span> entity;
+     * });
+     * </pre>
+     * @param entityLambda The handler of entity row of ${data.exEntity.className} (NotNull)
+     * @return The Entity used to delete (NotNull)
+     */
+    public ${data.exEntity.className} delete(Supplier<${data.exEntity.className}> entityLambda) {
+        ${data.exEntity.className} ${manager.initUncap($data.tableName)} = entityLambda.get();
+        ${data.dbMeta.className} dbMeta = asDBMeta();
+        dbMeta.validateKeyColumn(${manager.initUncap($data.tableName)});
+        ${manager.initUncap($data.kvs.kvsStoreFacadeImpl.className)}.delete(dbMeta, dbMeta.extractKeyList(${manager.initUncap($data.tableName)}));
+
+        return ${manager.initUncap($data.tableName)};
+    }
+#end
+}

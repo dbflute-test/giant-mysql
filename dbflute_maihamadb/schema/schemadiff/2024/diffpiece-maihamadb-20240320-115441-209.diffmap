@@ -1,0 +1,152 @@
+map:{
+    ; 2024/03/20 11:54:41.209 = map:{
+        ; diffDate = 2024/03/20 11:54:41.209
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; columnName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_2ND_INTEGER = map:{
+                        ; columnName = UNIQUE_2ND_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_3RD_INTEGER = map:{
+                        ; columnName = UNIQUE_3RD_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_4TH_INTEGER = map:{
+                        ; columnName = UNIQUE_4TH_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_2ND_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_2ND_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_3RD_NON_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_3RD_NON_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_4TH_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_4TH_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+                ; uniqueKeyDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; constraintName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; constraintName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; columnName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_2ND_INTEGER = map:{
+                        ; columnName = UNIQUE_2ND_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_3RD_INTEGER = map:{
+                        ; columnName = UNIQUE_3RD_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_4TH_INTEGER = map:{
+                        ; columnName = UNIQUE_4TH_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_2ND_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_2ND_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_3RD_NON_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_3RD_NON_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_4TH_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_4TH_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+                ; uniqueKeyDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; constraintName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; constraintName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; columnName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_2ND_INTEGER = map:{
+                        ; columnName = UNIQUE_2ND_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_3RD_INTEGER = map:{
+                        ; columnName = UNIQUE_3RD_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_4TH_INTEGER = map:{
+                        ; columnName = UNIQUE_4TH_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_2ND_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_2ND_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_3RD_NON_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_3RD_NON_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                    ; UNIQUE_4TH_INDEX_BIGINT = map:{
+                        ; columnName = UNIQUE_4TH_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+                ; uniqueKeyDiff = map:{
+                    ; UNIQUE_1ST_INTEGER = map:{
+                        ; constraintName = UNIQUE_1ST_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; UNIQUE_1ST_INDEX_BIGINT = map:{
+                        ; constraintName = UNIQUE_1ST_INDEX_BIGINT
+                        ; diffType = DELETE
+                    }
+                }
+            }
+        }
+    }
+}

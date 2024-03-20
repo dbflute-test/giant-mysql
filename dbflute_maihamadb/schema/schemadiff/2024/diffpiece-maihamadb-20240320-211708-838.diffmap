@@ -1,0 +1,63 @@
+map:{
+    ; 2024/03/20 21:17:08.838 = map:{
+        ; diffDate = 2024/03/20 21:17:08.838
+        ; diffAuthor = jflute
+        ; diffGitBranch = master
+        ; tableDiff = map:{
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; indexDiff = map:{
+                    ; IX_GIANT_SIDE_INDEX_BOOLEAN = map:{
+                        ; constraintName = IX_GIANT_SIDE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_INDEX_DATE = map:{
+                        ; constraintName = IX_GIANT_SIDE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_INDEX_DATETIME = map:{
+                        ; constraintName = IX_GIANT_SIDE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_INDEX_INTEGER = map:{
+                        ; constraintName = IX_GIANT_SIDE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_INDEX_STRING = map:{
+                        ; constraintName = IX_GIANT_SIDE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_NULLABLE_INDEX_BOOLEAN = map:{
+                        ; constraintName = IX_GIANT_SIDE_NULLABLE_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_NULLABLE_INDEX_DATE = map:{
+                        ; constraintName = IX_GIANT_SIDE_NULLABLE_INDEX_DATE
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_NULLABLE_INDEX_DATETIME = map:{
+                        ; constraintName = IX_GIANT_SIDE_NULLABLE_INDEX_DATETIME
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_NULLABLE_INDEX_INTEGER = map:{
+                        ; constraintName = IX_GIANT_SIDE_NULLABLE_INDEX_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_NULLABLE_INDEX_STRING = map:{
+                        ; constraintName = IX_GIANT_SIDE_NULLABLE_INDEX_STRING
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_UNIQUE_2ND_INTEGER = map:{
+                        ; constraintName = IX_GIANT_SIDE_UNIQUE_2ND_INTEGER
+                        ; diffType = ADD
+                    }
+                    ; IX_GIANT_SIDE_UNIQUE_4TH_INTEGER = map:{
+                        ; constraintName = IX_GIANT_SIDE_UNIQUE_4TH_INTEGER
+                        ; diffType = ADD
+                    }
+                }
+            }
+        }
+    }
+}

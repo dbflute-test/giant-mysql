@@ -1,0 +1,50 @@
+map:{
+    ; 2024/03/20 02:54:12.267 = map:{
+        ; diffDate = 2024/03/20 02:54:12.267
+        ; diffAuthor = jflute
+        ; tableDiff = map:{
+            ; giant = map:{
+                ; tableName = giant
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NON_INDEX_BOOLEAN = map:{
+                        ; columnName = NON_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEXD_BOOLEAN = map:{
+                        ; columnName = NON_INDEXD_BOOLEAN
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_ref = map:{
+                ; tableName = giant_ref
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NON_INDEX_BOOLEAN = map:{
+                        ; columnName = NON_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEXD_BOOLEAN = map:{
+                        ; columnName = NON_INDEXD_BOOLEAN
+                        ; diffType = DELETE
+                    }
+                }
+            }
+            ; giant_side = map:{
+                ; tableName = giant_side
+                ; diffType = CHANGE
+                ; columnDiff = map:{
+                    ; NON_INDEX_BOOLEAN = map:{
+                        ; columnName = NON_INDEX_BOOLEAN
+                        ; diffType = ADD
+                    }
+                    ; NON_INDEXD_BOOLEAN = map:{
+                        ; columnName = NON_INDEXD_BOOLEAN
+                        ; diffType = DELETE
+                    }
+                }
+            }
+        }
+    }
+}
