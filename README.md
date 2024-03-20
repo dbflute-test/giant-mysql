@@ -5,8 +5,9 @@ test project for Giant tables on MySQL
 # Quick Trial
 
 0. prepare MySQL: put localdb/mysql and boot by script
-1. execute GiantMakingTest
-2. execute ReplaceSchema
+1. fix isRealPerformance() of GiantMakingTest
+2. execute GiantMakingTest@test_making_TSV()
+3. execute ReplaceSchema
 
 *ReplaceSchema
 ```java
