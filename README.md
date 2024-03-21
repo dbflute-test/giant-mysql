@@ -79,7 +79,7 @@ dbflute_maihamadb
  |  |    |  |-UTF-8
  |  |    |     |-92-GIANT.tsv      // here
  |  |    |     |-93-GIANT_REF.tsv  // here
- |  |    |     |-94-GIANT_ISDE.tsv // here
+ |  |    |     |-94-GIANT_SIDE.tsv // here
  |  |    |     |-loadingControlMap.dataprop
  |  |-...
 ```
