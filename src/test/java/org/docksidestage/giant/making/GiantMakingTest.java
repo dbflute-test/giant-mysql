@@ -95,11 +95,11 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
     // and the data can be registered when ReplaceSchema (the TSV files are git-ignored)
     // _/_/_/_/_/_/_/_/_/_/
     public void test_making_TSV() throws Exception {
-        final int basePointSize = filterRecordSize(300);
-        final int refSize = filterRecordSize(1000);
-        outputGiant(92, basePointSize, GiantDbm.getInstance());
-        outputGiantRef(93, refSize, GiantRefDbm.getInstance(), basePointSize);
-        outputGiantSide(94, basePointSize, GiantSideDbm.getInstance(), basePointSize);
+        final int basePointCount = filterRecordCount(300);
+        final int refCount = filterRecordCount(1000);
+        outputGiant(92, basePointCount, GiantDbm.getInstance());
+        outputGiantRef(93, refCount, GiantRefDbm.getInstance(), basePointCount);
+        outputGiantSide(94, basePointCount, GiantSideDbm.getInstance(), basePointCount);
     }
 
     protected boolean isRealPerformance() {
@@ -109,36 +109,36 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
     // -----------------------------------------------------
     //                                           Record Size
     //                                           -----------
-    protected int filterRecordSize(int standardSize) {
+    protected int filterRecordCount(int standardCount) {
         if (isRealPerformance()) {
-            return standardSize * 10000;
+            return standardCount * 10000;
         } else { // training
-            return standardSize;
+            return standardCount;
         }
     }
 
     // ===================================================================================
     //                                                                              Output
     //                                                                              ======
-    private void outputGiant(int giantPrefixNumber, int recordSize, DBMeta dbmeta) {
-        doOutputGiantable(giantPrefixNumber, recordSize, dbmeta, currentId -> null); // as base point
+    private void outputGiant(int giantPrefixNumber, int recordCount, DBMeta dbmeta) {
+        doOutputGiantable(giantPrefixNumber, recordCount, dbmeta, currentId -> null); // as base point
     }
 
-    private void outputGiantRef(int prefixNumber, int recordSize, DBMeta dbmeta, int basePointSize) {
+    private void outputGiantRef(int prefixNumber, int recordCount, DBMeta dbmeta, int basePointSize) {
         final Random random = new Random();
-        doOutputGiantable(prefixNumber, recordSize, dbmeta, currentId -> {
+        doOutputGiantable(prefixNumber, recordCount, dbmeta, currentId -> {
             final int parentId = random.nextInt(basePointSize) + 1; // completely random
             return Long.valueOf(parentId);
         });
     }
 
-    private void outputGiantSide(int prefixNumber, int recordSize, DBMeta dbmeta, int basePointSize) {
-        doOutputGiantable(prefixNumber, recordSize, dbmeta, currentId -> Long.valueOf(currentId));
+    private void outputGiantSide(int prefixNumber, int recordCount, DBMeta dbmeta, int basePointSize) {
+        doOutputGiantable(prefixNumber, recordCount, dbmeta, currentId -> Long.valueOf(currentId));
     }
 
-    private void doOutputGiantable(int prefixNumber, int recordSize, DBMeta dbmeta, Function<Integer, Long> fkIdProvider) {
+    private void doOutputGiantable(int prefixNumber, int recordCount, DBMeta dbmeta, Function<Integer, Long> fkIdProvider) {
         final String tsvPath = prepareTsvPath(prefixNumber, dbmeta);
-        writeTsv(tsvPath, recordSize, dbmeta, fkIdProvider);
+        writeTsv(tsvPath, recordCount, dbmeta, fkIdProvider);
     }
 
     private String prepareTsvPath(int prefixNumber, DBMeta dbmeta) {
@@ -159,14 +159,14 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
     // ===================================================================================
     //                                                                              Writer
     //                                                                              ======
-    private void writeTsv(String tsvPath, int recordSize, DBMeta dbmeta, Function<Integer, Long> fkIdProvider) {
+    private void writeTsv(String tsvPath, int recordCount, DBMeta dbmeta, Function<Integer, Long> fkIdProvider) {
         BufferedWriter bw = null;
         try {
             log("...Writing {}", dbmeta.getTableDispName());
 
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(tsvPath), "UTF-8"));
             doWriteHeader(bw, dbmeta);
-            doWriteRecords(bw, dbmeta, recordSize, prepareGiantableCreator(dbmeta), fkIdProvider);
+            doWriteRecords(bw, dbmeta, recordCount, prepareGiantableCreator(dbmeta), fkIdProvider);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to write the TSV: " + tsvPath, e);
         } finally {
@@ -191,10 +191,10 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
         }
     }
 
-    private void doWriteRecords(BufferedWriter bw, DBMeta dbmeta, int recordSize, Supplier<Giantable> giantableCreator,
+    private void doWriteRecords(BufferedWriter bw, DBMeta dbmeta, int recordCount, Supplier<Giantable> giantableCreator,
             Function<Integer, Long> fkIdProvider) throws IOException {
         final int initialBaseId = 1; // fixed
-        final int loopLimitCount = recordSize + initialBaseId;
+        final int loopLimitCount = recordCount + initialBaseId;
         final CurrentSelfParent selfParentId = new CurrentSelfParent();
         for (int currentId = initialBaseId; currentId < loopLimitCount; currentId++) {
             final Giantable giantable = prepareGiantable(giantableCreator, fkIdProvider, selfParentId, currentId);
