@@ -106,6 +106,9 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
         return false; // temporarily change it if performance
     }
 
+    // -----------------------------------------------------
+    //                                           Record Size
+    //                                           -----------
     protected int filterRecordSize(int standardSize) {
         if (isRealPerformance()) {
             return standardSize * 10000;
@@ -146,7 +149,10 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to get canonical path: " + projectDir, e);
         }
-        final String outputDir = projectPath + "/dbflute_maihamadb/playsql/data/ut/tsv/UTF-8";
+        String outputDir = projectPath + "/dbflute_maihamadb/playsql/data/ut/tsv/UTF-8";
+        if (!isRealPerformance()) { // as training
+            outputDir = outputDir + "/giant_backup";
+        }
         return outputDir + "/" + prefixNumber + "-" + dbmeta.getTableSqlName() + ".tsv";
     }
 
