@@ -2,6 +2,25 @@ Giant for MySQL (dbflute-test)
 =======================
 test project for Giant tables on MySQL
 
+# Giant tables
+
+- GIANT table :: 3000000 records
+- GIANT_REF table :: 10000000 records
+- GIANT_SIDE table :: 3000000 records
+
+```
+           +-------+ 1
+  3000000  | GIANT |------T     1 +------------+
+           +-------+      L-------| GIANT_SIDE |
+            1 |                   +------------+
+              |                       3000000
+         0..* |
+           +-----------+
+ 10000000  | GIANT_REF |
+           +-----------+
+```
+
+
 # Quick Trial
 
 0. import the project on your IDE by Maven
