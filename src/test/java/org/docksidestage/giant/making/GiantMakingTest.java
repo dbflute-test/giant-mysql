@@ -96,10 +96,11 @@ public class GiantMakingTest extends UnitGiantBasicTestCase {
     // _/_/_/_/_/_/_/_/_/_/
     public void test_making_TSV() throws Exception {
         final int basePointCount = filterRecordCount(300);
-        final int refCount = filterRecordCount(1000);
+        final int refCount = filterRecordCount(1000); // as one-to-many
+        final int sideCount = basePointCount; // as one-to-one
         outputGiant(92, basePointCount, GiantDbm.getInstance());
         outputGiantRef(93, refCount, GiantRefDbm.getInstance(), basePointCount);
-        outputGiantSide(94, basePointCount, GiantSideDbm.getInstance(), basePointCount);
+        outputGiantSide(94, sideCount, GiantSideDbm.getInstance(), basePointCount);
     }
 
     protected boolean isRealPerformance() {
