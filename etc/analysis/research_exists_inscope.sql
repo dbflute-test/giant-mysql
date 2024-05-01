@@ -231,8 +231,7 @@ select count(*)
   from `MEMBER` dfloc
  where dfloc.MEMBER_ID in (select sub1loc.MEMBER_ID
                              from PURCHASE sub1loc
-                            where sub1loc.MEMBER_ID = dfloc.MEMBER_ID
-                              and sub1loc.PURCHASE_PRICE = 1000
+                            where sub1loc.PURCHASE_PRICE = 1000
        )
 -- (MySQL-8.0.36)
 +----+--------------+-------------+------------+--------+-----------------------------------------+-------------------+---------+-----------------------+------+----------+-------------+
