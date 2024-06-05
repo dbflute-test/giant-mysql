@@ -6,6 +6,9 @@
 -- _/_/_/_/
 -- GIANT :: 300万件
 -- GIANT_REF :: 1000万件
+--
+-- MySQL-8.0.x
+
 
 
 -- =======================================================================================
@@ -272,3 +275,196 @@ select ref.GIANT_ID, ref.NON_INDEX_STRING
 1 row in set, 1 warning (0.00 sec)
 
  
+
+-- =======================================================================================
+--                                                                         where句があると？
+--                                                                         ===============
+-- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+-- order byと同じカラム INDEX_DATE でwhere句なら？
+--  => 普通にwhere句のINDEXが利用される (どんなときも変わらない？)
+-- _/_/_/_/_/_/_/_/_/_/
+
+-- 絞ってまあまあな件数
+select dfloc.GIANT_ID, dfrel_5.GIANT_SIDE_ID
+     , (select count(sub1loc.GIANT_REF_ID)
+          from GIANT_REF sub1loc 
+         where sub1loc.GIANT_ID = dfloc.GIANT_ID
+       ) as REF_COUNT_ALL
+     , (select count(sub1loc.GIANT_ID)
+          from GIANT sub1loc 
+         where sub1loc.SELF_PARENT_ID = dfloc.GIANT_ID
+       ) as SELF_COUNT_ALL
+  from GIANT dfloc
+    left outer join GIANT_SIDE dfrel_5 on dfloc.GIANT_ID = dfrel_5.GIANT_ID
+ where dfloc.INDEX_DATE > '2111-11-11' -- point
+ order by dfloc.INDEX_DATE -- point
+ limit 20
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+| id | select_type        | table   | partitions | type   | possible_keys                                    | key                                    | key_len | ref                      | rows    | filtered | Extra                    |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+|  1 | PRIMARY            | dfloc   | NULL       | range  | IX_GIANT_INDEX_DATE                              | IX_GIANT_INDEX_DATE                    | 3       | NULL                     | 1449694 |   100.00 | Using where; Using index |
+|  1 | PRIMARY            | dfrel_5 | NULL       | eq_ref | GIANT_ID,IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER | GIANT_ID                               | 8       | maihamadb.dfloc.GIANT_ID |       1 |   100.00 | Using index              |
+|  3 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | FK_GIANT_SELF                                    | FK_GIANT_SELF                          | 9       | maihamadb.dfloc.GIANT_ID |      94 |   100.00 | Using index              |
+|  2 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER           | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.dfloc.GIANT_ID |       3 |   100.00 | Using index              |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+4 rows in set, 3 warnings (0.01 sec)
+
+select count(*)
+  from GIANT dfloc
+ where dfloc.INDEX_DATE > '2111-11-11'
++----------+
+| count(*) |
++----------+
+|  1319929 |
++----------+
+1 row in set (0.18 sec)
+
+
+-- 絞ってるけど全件検索
+select dfloc.GIANT_ID, dfrel_5.GIANT_SIDE_ID
+     , (select count(sub1loc.GIANT_REF_ID)
+          from GIANT_REF sub1loc 
+         where sub1loc.GIANT_ID = dfloc.GIANT_ID
+       ) as REF_COUNT_ALL
+     , (select count(sub1loc.GIANT_ID)
+          from GIANT sub1loc 
+         where sub1loc.SELF_PARENT_ID = dfloc.GIANT_ID
+       ) as SELF_COUNT_ALL
+  from GIANT dfloc
+    left outer join GIANT_SIDE dfrel_5 on dfloc.GIANT_ID = dfrel_5.GIANT_ID
+ where dfloc.INDEX_DATE > '2000-01-01' -- point
+ order by dfloc.INDEX_DATE -- point
+ limit 20
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+| id | select_type        | table   | partitions | type   | possible_keys                                    | key                                    | key_len | ref                      | rows    | filtered | Extra                    |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+|  1 | PRIMARY            | dfloc   | NULL       | range  | IX_GIANT_INDEX_DATE                              | IX_GIANT_INDEX_DATE                    | 3       | NULL                     | 1449694 |   100.00 | Using where; Using index |
+|  1 | PRIMARY            | dfrel_5 | NULL       | eq_ref | GIANT_ID,IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER | GIANT_ID                               | 8       | maihamadb.dfloc.GIANT_ID |       1 |   100.00 | Using index              |
+|  3 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | FK_GIANT_SELF                                    | FK_GIANT_SELF                          | 9       | maihamadb.dfloc.GIANT_ID |      94 |   100.00 | Using index              |
+|  2 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER           | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.dfloc.GIANT_ID |       3 |   100.00 | Using index              |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+---------+----------+--------------------------+
+4 rows in set, 3 warnings (0.01 sec)
+ 
+select count(*)
+  from GIANT dfloc
+ where dfloc.INDEX_DATE >= '2000-01-01'
++----------+
+| count(*) |
++----------+
+|  3000000 |
++----------+
+1 row in set (0.35 sec)
+ 
+ 
+-- 絞ってめちゃ少ない件数
+select dfloc.GIANT_ID, dfrel_5.GIANT_SIDE_ID
+     , (select count(sub1loc.GIANT_REF_ID)
+          from GIANT_REF sub1loc 
+         where sub1loc.GIANT_ID = dfloc.GIANT_ID
+       ) as REF_COUNT_ALL
+     , (select count(sub1loc.GIANT_ID)
+          from GIANT sub1loc 
+         where sub1loc.SELF_PARENT_ID = dfloc.GIANT_ID
+       ) as SELF_COUNT_ALL
+  from GIANT dfloc
+    left outer join GIANT_SIDE dfrel_5 on dfloc.GIANT_ID = dfrel_5.GIANT_ID
+ where dfloc.INDEX_DATE <= '2000-01-01' -- point
+ order by dfloc.INDEX_DATE -- point
+ limit 20
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------+
+| id | select_type        | table   | partitions | type   | possible_keys                                    | key                                    | key_len | ref                      | rows | filtered | Extra                    |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------+
+|  1 | PRIMARY            | dfloc   | NULL       | range  | IX_GIANT_INDEX_DATE                              | IX_GIANT_INDEX_DATE                    | 3       | NULL                     |   43 |   100.00 | Using where; Using index |
+|  1 | PRIMARY            | dfrel_5 | NULL       | eq_ref | GIANT_ID,IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER | GIANT_ID                               | 8       | maihamadb.dfloc.GIANT_ID |    1 |   100.00 | Using index              |
+|  3 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | FK_GIANT_SELF                                    | FK_GIANT_SELF                          | 9       | maihamadb.dfloc.GIANT_ID |   94 |   100.00 | Using index              |
+|  2 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER           | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.dfloc.GIANT_ID |    3 |   100.00 | Using index              |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------+
+4 rows in set, 3 warnings (0.00 sec)
+
+select count(*)
+  from GIANT dfloc
+ where dfloc.INDEX_DATE <= '2000-01-01'
++----------+
+| count(*) |
++----------+
+|       43 |
++----------+
+1 row in set (0.00 sec)
+
+
+
+-- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+-- order byと違うカラム INDEX_INTEGER でwhere句なら?
+--  => 状況によって利用されるINDEXが変わる (絞りが甘いほうがorder byのINDEXの恩恵を得る)
+-- _/_/_/_/_/_/_/_/_/_/
+
+-- まあまあな絞り込み
+select dfloc.GIANT_ID, dfrel_5.GIANT_SIDE_ID
+     , (select count(sub1loc.GIANT_REF_ID)
+          from GIANT_REF sub1loc 
+         where sub1loc.GIANT_ID = dfloc.GIANT_ID
+       ) as REF_COUNT_ALL
+     , (select count(sub1loc.GIANT_ID)
+          from GIANT sub1loc 
+         where sub1loc.SELF_PARENT_ID = dfloc.GIANT_ID
+       ) as SELF_COUNT_ALL
+  from GIANT dfloc
+    left outer join GIANT_SIDE dfrel_5 on dfloc.GIANT_ID = dfrel_5.GIANT_ID
+ where dfloc.INDEX_INTEGER <= 3000 -- point
+ order by dfloc.INDEX_DATE -- point
+ limit 20
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+-------------+
+| id | select_type        | table   | partitions | type   | possible_keys                                    | key                                    | key_len | ref                      | rows | filtered | Extra       |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+-------------+
+|  1 | PRIMARY            | dfloc   | NULL       | index  | IX_GIANT_INDEX_INTEGER                           | IX_GIANT_INDEX_DATE                    | 3       | NULL                     |   40 |    50.00 | Using where |
+|  1 | PRIMARY            | dfrel_5 | NULL       | eq_ref | GIANT_ID,IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER | GIANT_ID                               | 8       | maihamadb.dfloc.GIANT_ID |    1 |   100.00 | Using index |
+|  3 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | FK_GIANT_SELF                                    | FK_GIANT_SELF                          | 9       | maihamadb.dfloc.GIANT_ID |   94 |   100.00 | Using index |
+|  2 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER           | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.dfloc.GIANT_ID |    3 |   100.00 | Using index |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+-------------+
+4 rows in set, 3 warnings (0.01 sec)
+
+select count(*)
+  from GIANT dfloc
+ where dfloc.INDEX_INTEGER <= 3000
++----------+
+| count(*) |
++----------+
+|   900300 |
++----------+
+1 row in set (0.16 sec)
+
+
+-- だいぶ絞ったとき
+select dfloc.GIANT_ID, dfrel_5.GIANT_SIDE_ID
+     , (select count(sub1loc.GIANT_REF_ID)
+          from GIANT_REF sub1loc 
+         where sub1loc.GIANT_ID = dfloc.GIANT_ID
+       ) as REF_COUNT_ALL
+     , (select count(sub1loc.GIANT_ID)
+          from GIANT sub1loc 
+         where sub1loc.SELF_PARENT_ID = dfloc.GIANT_ID
+       ) as SELF_COUNT_ALL
+  from GIANT dfloc
+    left outer join GIANT_SIDE dfrel_5 on dfloc.GIANT_ID = dfrel_5.GIANT_ID
+ where dfloc.INDEX_INTEGER <= 10 -- point
+ order by dfloc.INDEX_DATE -- point
+ limit 20
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------------------------------+
+| id | select_type        | table   | partitions | type   | possible_keys                                    | key                                    | key_len | ref                      | rows | filtered | Extra                                            |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------------------------------+
+|  1 | PRIMARY            | dfloc   | NULL       | range  | IX_GIANT_INDEX_INTEGER                           | IX_GIANT_INDEX_INTEGER                 | 4       | NULL                     | 3300 |   100.00 | Using index condition; Using MRR; Using filesort |
+|  1 | PRIMARY            | dfrel_5 | NULL       | eq_ref | GIANT_ID,IX_GIANT_SIDE_COMPOUND_GIANT_ID_INTEGER | GIANT_ID                               | 8       | maihamadb.dfloc.GIANT_ID |    1 |   100.00 | Using index                                      |
+|  3 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | FK_GIANT_SELF                                    | FK_GIANT_SELF                          | 9       | maihamadb.dfloc.GIANT_ID |   94 |   100.00 | Using index                                      |
+|  2 | DEPENDENT SUBQUERY | sub1loc | NULL       | ref    | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER           | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.dfloc.GIANT_ID |    3 |   100.00 | Using index                                      |
++----+--------------------+---------+------------+--------+--------------------------------------------------+----------------------------------------+---------+--------------------------+------+----------+--------------------------------------------------+
+4 rows in set, 3 warnings (0.00 sec)
+
+select count(*)
+  from GIANT dfloc
+ where dfloc.INDEX_INTEGER <= 10
++----------+
+| count(*) |
++----------+
+|     3300 |
++----------+
+1 row in set (0.01 sec)
