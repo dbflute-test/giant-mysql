@@ -211,3 +211,51 @@ select 'dummy'
  limit 1
 Empty set (1.09 sec)
 -- => 存在しない場合はちょい遅いけど、count(*)よりは速い
+
+
+
+select 'dummy'
+  from GIANT_REF ref
+ where ref.INDEX_DATE <= '2001-01-01'
+ limit 1
+
+
+select 'dummy'
+  from GIANT_REF ref
+ where ref.INDEX_DATE <= '0001-01-01'
+ limit 1
+
+
+
+-- =======================================================================================
+--                                                                                 検討メモ
+--                                                                                 =======
+INDEXあるケース:
+A. 存在する場合は速い
+B. 存在しない場合はもっと速い
+(count(*)も速いけど、limitの方がより速い)
+
+INDEXないケース:
+C. 存在する場合は速い
+D. 存在しない場合はかなり遅い => 回避しようがない ★
+(count(*)だと両方ともかなり遅い)
+
+　↓↓↓
+
+// selectExists()を作るとしたらこうなる
+boolean exists = selectExists(cb -> {
+    cb.query().setMemberStatusCode_Formalized();
+});
+boolean exists = selectExists(cb -> { // OptionalのisPresent()を省略
+    //cb.specify().columnMemberId(); // これを省略
+    cb.query().setMemberStatusCode_Formalized();
+    //cb.fetchFirst(1); // これを省略
+});
+
+// selectExists()を作らないとしたらこの実装を情報提供
+OptionalEntity<Member> optMember = memberBhv.selectEntity(cb -> {
+    cb.specify().columnMemberId();
+    cb.query().setMemberStatusCode_Equal_Formalized();
+    cb.fetchFirst(1); // limit 1
+});
+return optMember.isPresent();
