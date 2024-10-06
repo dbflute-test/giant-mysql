@@ -16,6 +16,16 @@
 -- case existing: GIANT
 select count(*)
   from GIANT gi
+ where gi.INDEX_DATE <= '2001-01-01'
++----------+
+| count(*) |
++----------+
+|    15109 |
++----------+
+1 row in set (0.01 sec)
+
+select count(*)
+  from GIANT gi
  where gi.NON_INDEX_DATE <= '2001-01-01'
 +----------+
 | count(*) |
@@ -31,6 +41,16 @@ select count(*)
 1 row in set, 1 warning (0.02 sec)
 
 -- case existing: GIANT_REF
+select count(*)
+  from GIANT_REF ref
+ where ref.INDEX_DATE <= '2001-01-01'
++----------+
+| count(*) |
++----------+
+|    50152 |
++----------+
+1 row in set (0.01 sec)
+
 select count(*)
   from GIANT_REF ref
  where ref.NON_INDEX_DATE <= '2001-01-01'
@@ -50,6 +70,16 @@ select count(*)
 -- case non-existing: GIANT_REF
 select count(*)
   from GIANT_REF ref
+ where ref.INDEX_DATE <= '0001-01-01'
++----------+
+| count(*) |
++----------+
+|        0 |
++----------+
+1 row in set (0.00 sec)
+ 
+select count(*)
+  from GIANT_REF ref
  where ref.NON_INDEX_DATE <= '0001-01-01'
 +----------+
 | count(*) |
@@ -64,6 +94,17 @@ select count(*)
 -- limit 1 way
 -- _/_/_/_/
 -- case existing: GIANT
+select 'dummy'
+  from GIANT gi
+ where gi.INDEX_DATE <= '2001-01-01'
+ limit 1
++-------+
+| dummy |
++-------+
+| dummy |
++-------+
+1 row in set (0.00 sec)
+
 select 'dummy'
   from GIANT gi
  where gi.NON_INDEX_DATE <= '2001-01-01'
@@ -84,6 +125,17 @@ select 'dummy'
 -- case existing: GIANT_REF
 select 'dummy'
   from GIANT_REF ref
+ where ref.INDEX_DATE <= '2001-01-01'
+ limit 1
++-------+
+| dummy |
++-------+
+| dummy |
++-------+
+1 row in set (0.00 sec)
+
+select 'dummy'
+  from GIANT_REF ref
  where ref.NON_INDEX_DATE <= '2001-01-01'
  limit 1
 +-------+
@@ -100,6 +152,12 @@ select 'dummy'
 1 row in set, 1 warning (0.00 sec)
 
 -- case non-existing: GIANT_REF
+select 'dummy'
+  from GIANT_REF ref
+ where ref.INDEX_DATE <= '0001-01-01'
+ limit 1
+Empty set (0.00 sec)
+
 select 'dummy'
   from GIANT_REF ref
  where ref.NON_INDEX_DATE <= '0001-01-01'
