@@ -1,4 +1,10 @@
 
+-- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+-- research_compound_index_orderby.sql の方で実質的に確認できている
+-- _/_/_/_/_/_/_/_/_/_/
+
+
+
 explain
 select pur.PURCHASE_ID, mb.MEMBER_NAME, prod.PRODUCT_NAME
   from PURCHASE pur
