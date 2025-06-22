@@ -341,7 +341,7 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 
 
 
- -- ---------------------------------------------------------
+-- ---------------------------------------------------------
 --                                    複合インデックス貼ってみた
 --                                    ----------------------
 -- ascの複合インデックスを貼ってみる
@@ -467,83 +467,55 @@ select count(*)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-
-
--- =======================================================================================
---                                                                    番外: 等値条件+日付範囲
---                                                                    ====================
--- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
--- order by用に作ったピンポイント複合インデックスは絞り込みでも使えるか？
--- _/_/_/_/
-
+-- ---------------------------------------------------------
+--                                         まとめ的パッと見比較
+--                                         -----------------
+-- 複合インデックスなし
 explain
-select *
-  from GIANT dfloc
- where dfloc.INDEX_INTEGER = 1 
-   and dfloc.INDEX_DATETIME between '2024-01-01 12:34:56' and '2024-01-24 12:34:56'
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-| id | select_type | table | partitions | type  | possible_keys                                                                             | key                                        | key_len | ref  | rows | filtered | Extra                 |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-|  1 | SIMPLE      | dfloc | NULL       | range | IX_GIANT_INDEX_INTEGER,IX_GIANT_INDEX_DATETIME,IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC | IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC | 9       | NULL |    1 |   100.00 | Using index condition |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-1 row in set, 1 warning (0.07 sec)
+select gi.INDEX_INTEGER, ref.INDEX_DATETIME
+  from GIANT_REF ref
+    inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
+ where gi.INDEX_INTEGER < 50
+ order by ref.INDEX_DATETIME asc 
++----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys                          | key                                    | key_len | ref                   | rows  | filtered | Extra                                                     |
++----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+|  1 | SIMPLE      | gi    | NULL       | range | PRIMARY,IX_GIANT_INDEX_INTEGER         | IX_GIANT_INDEX_INTEGER                 | 4       | NULL                  | 31240 |   100.00 | Using where; Using index; Using temporary; Using filesort |
+|  1 | SIMPLE      | ref   | NULL       | ref   | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.gi.GIANT_ID |     3 |   100.00 | NULL                                                      |
++----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+2 rows in set, 1 warning (0.00 sec)
+| -> Sort: ref.INDEX_DATETIME  (actual time=5189..5190 rows=50619 loops=1)
+    -> Stream results  (cost=113694 rows=97636) (actual time=5.65..5179 rows=50619 loops=1)
+        -> Nested loop inner join  (cost=113694 rows=97636) (actual time=5.61..5173 rows=50619 loops=1)
+            -> Filter: (gi.INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.108..7.59 rows=15000 loops=1)
+                -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.103..6.61 rows=15000 loops=1)
+            -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=3.13 rows=3.13) (actual time=0.322..0.344 rows=3.37 loops=15000)
 
-↑Using index にはならないのかな？
-
-create index IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_ASC on GIANT (INDEX_INTEGER, INDEX_DATETIME)
-
+-- 複合インデックス貼ってみた
 explain
-select *
-  from GIANT dfloc
- where dfloc.INDEX_INTEGER = 1 
-   and dfloc.INDEX_DATETIME between '2024-01-01 12:34:56' and '2024-01-24 12:34:56'
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-| id | select_type | table | partitions | type  | possible_keys                                                                                                                       | key                                        | key_len | ref  | rows | filtered | Extra                 |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-|  1 | SIMPLE      | dfloc | NULL       | range | IX_GIANT_INDEX_INTEGER,IX_GIANT_INDEX_DATETIME,IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC,IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_ASC | IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC | 9       | NULL |    1 |   100.00 | Using index condition |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+-----------------------+
-1 row in set, 1 warning (0.00 sec)
+select gi.INDEX_INTEGER, ref.INDEX_DATETIME
+  from GIANT_REF ref
+    inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
+ where gi.INDEX_INTEGER < 50
+ order by ref.INDEX_DATETIME asc
++----+-------------+-------+------------+-------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys                                                                            | key                                               | key_len | ref                   | rows  | filtered | Extra                                                     |
++----+-------------+-------+------------+-------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+|  1 | SIMPLE      | gi    | NULL       | range | PRIMARY,IX_GIANT_INDEX_INTEGER                                                           | IX_GIANT_INDEX_INTEGER                            | 4       | NULL                  | 31240 |   100.00 | Using where; Using index; Using temporary; Using filesort |
+|  1 | SIMPLE      | ref   | NULL       | ref   | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER,IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | 8       | maihamadb.gi.GIANT_ID |     3 |   100.00 | Using index                                               |
++----+-------------+-------+------------+-------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
+2 rows in set, 1 warning (0.00 sec)
+| -> Sort: ref.INDEX_DATETIME  (actual time=78.2..79.4 rows=50619 loops=1)
+    -> Stream results  (cost=48494 rows=107639) (actual time=0.121..68.7 rows=50619 loops=1)
+        -> Nested loop inner join  (cost=48494 rows=107639) (actual time=0.115..60.7 rows=50619 loops=1)
+            -> Filter: (gi.INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.0375..8.68 rows=15000 loops=1)
+                -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.0358..7.39 rows=15000 loops=1)
+            -> Covering index lookup on ref using IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC (GIANT_ID=gi.GIANT_ID)  (cost=1.01 rows=3.45) (actual time=0.00249..0.00313 rows=3.37 loops=15000)
 
-↑ascのINDEXがあっても変わらない。
-
-
-explain
-select INDEX_INTEGER, INDEX_DATETIME
-  from GIANT dfloc
- where dfloc.INDEX_INTEGER = 1 
-   and dfloc.INDEX_DATETIME between '2024-01-01 12:34:56' and '2024-01-24 12:34:56'
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+--------------------------+
-| id | select_type | table | partitions | type  | possible_keys                                                                                                                       | key                                        | key_len | ref  | rows | filtered | Extra                    |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+--------------------------+
-|  1 | SIMPLE      | dfloc | NULL       | range | IX_GIANT_INDEX_INTEGER,IX_GIANT_INDEX_DATETIME,IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC,IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_ASC | IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_DESC | 9       | NULL |    1 |   100.00 | Using where; Using index |
-+----+-------------+-------+------------+-------+-------------------------------------------------------------------------------------------------------------------------------------+--------------------------------------------+---------+------+------+----------+--------------------------+
-1 row in set, 1 warning (0.00 sec)
-
-↑これだったら、Using index で完結するということだった。
-
--- ascは戻す:
-drop index IX_GIANT_INDEX_INTEGER_INDEX_DATETIME_ASC on GIANT
-
-なんにせよ、降順INDEXでも範囲検索は大丈夫そう。
+-- thinking
+-- o Nested loopで使われるref側のインデックスがピンポイント複合インデックスになっているが...
+-- o 最後にソートするって話は別に変わらないので、explainを見る限りそこでfilesortされているようには見えるが...
+-- o actual time や cost は減ってるので、どこかしら何かしらで効果はあるということ
+-- o うーむー、joinしながらソートできてるみたいな話なんだろうか？
 
 
- 
- 
