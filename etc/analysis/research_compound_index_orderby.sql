@@ -185,8 +185,11 @@ select *
 |  1 | SIMPLE      | ref   | NULL       | ref  | FK_GIANT_REF_ZONE_MEMBER | FK_GIANT_REF_ZONE_MEMBER | 4       | const | 1024530 |   100.00 | Using filesort |
 +----+-------------+-------+------------+------+--------------------------+--------------------------+---------+-------+---------+----------+----------------+
 1 row in set, 1 warning (0.01 sec)
+| -> Sort: ref.INDEX_DATETIME  (cost=409958 rows=1.02e+6) (actual time=5255..5348 rows=500815 loops=1)
+    -> Index lookup on ref using FK_GIANT_REF_ZONE_MEMBER (ZONE_MEMBER_ID=1)  (cost=409958 rows=1.02e+6) (actual time=4.11..4757 rows=500815 loops=1)
 
 -- ascのピンポイント複合インデックスを貼ってみる
+-- (↓これ実行すると、FKのインデックスである FK_GIANT_REF_ZONE_MEMBER が消えるっぽい: 代替されるってことのようだ)
 create index IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC on GIANT_REF (ZONE_MEMBER_ID, INDEX_DATETIME)
 
 -- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => ピンポイント複合インデックスが使われてる、Using filesortない！
@@ -202,6 +205,7 @@ select *
 |  1 | SIMPLE      | ref   | NULL       | ref  | IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC | 4       | const | 1064018 |   100.00 | NULL  |
 +----+-------------+-------+------------+------+---------------------------------------------------------+---------------------------------------------------------+---------+-------+---------+----------+-------+
 1 row in set, 1 warning (0.01 sec)
+| -> Index lookup on ref using IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC (ZONE_MEMBER_ID=1)  (cost=413984 rows=1.06e+6) (actual time=25.5..18586 rows=500815 loops=1)
 
 -- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => 速い
 select count(*)
@@ -290,14 +294,15 @@ select count(*)
 --                                         特定インデックスなし
 --                                         -----------------
 -- 範囲検索してascソート => Using temporary; Using filesort
+-- o 最初のjoin行にUsing temporary; Using filesortが表示されているのはjoinしてからsortを行っている証拠のよう
 -- o REF側のGIANT_ID_INTEGERの複合インデックスが使われてるけど、二番目カラムは使われないのでそこに意味ない
--- o joinなしに比べて、Using temporaryが追加されていてより重い？
+-- o joinなしに比べて、Using temporaryが追加されていてより重い？ => そのようである、joinしてからsort
 explain
 select gi.INDEX_INTEGER, ref.INDEX_DATETIME
   from GIANT_REF ref
     inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
  where gi.INDEX_INTEGER < 50
- order by ref.INDEX_DATETIME asc
+ order by ref.INDEX_DATETIME asc 
 +----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
 | id | select_type | table | partitions | type  | possible_keys                          | key                                    | key_len | ref                   | rows  | filtered | Extra                                                     |
 +----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
@@ -305,11 +310,15 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 |  1 | SIMPLE      | ref   | NULL       | ref   | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.gi.GIANT_ID |     3 |   100.00 | NULL                                                      |
 +----+-------------+-------+------------+-------+----------------------------------------+----------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
 2 rows in set, 1 warning (0.00 sec)
- 
+| -> Sort: ref.INDEX_DATETIME  (actual time=5189..5190 rows=50619 loops=1)
+    -> Stream results  (cost=113694 rows=97636) (actual time=5.65..5179 rows=50619 loops=1)
+        -> Nested loop inner join  (cost=113694 rows=97636) (actual time=5.61..5173 rows=50619 loops=1)
+            -> Filter: (gi.INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.108..7.59 rows=15000 loops=1)
+                -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.103..6.61 rows=15000 loops=1)
+            -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=3.13 rows=3.13) (actual time=0.322..0.344 rows=3.37 loops=15000)
 
 -- 等値条件してascソート => 変わらずUsing temporary; Using filesort
--- o REF側のGIANT_ID_INTEGERの複合インデックスが使われてるけど、二番目カラムは使われないのでそこに意味ない
--- o とにかくjoinがでかいか？
+-- o REF側のGIANT_ID_INTEGERの複合インデックスが使われてるけど、二番目カラムは使われないのでそこに意味ない (たまたま)
 explain
 select gi.INDEX_INTEGER, ref.INDEX_DATETIME
   from GIANT_REF ref
@@ -323,6 +332,12 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 |  1 | SIMPLE      | ref   | NULL       | ref  | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.gi.GIANT_ID |    3 |   100.00 | NULL                                         |
 +----+-------------+-------+------------+------+----------------------------------------+----------------------------------------+---------+-----------------------+------+----------+----------------------------------------------+
 2 rows in set, 1 warning (0.00 sec)
+| -> Sort: ref.INDEX_DATETIME  (actual time=98..98 rows=1000 loops=1)
+    -> Stream results  (cost=1041 rows=938) (actual time=1.96..97.6 rows=1000 loops=1)
+        -> Nested loop inner join  (cost=1041 rows=938) (actual time=1.95..97.4 rows=1000 loops=1)
+            -> Covering index lookup on gi using IX_GIANT_INDEX_INTEGER (INDEX_INTEGER=1)  (cost=31.4 rows=300) (actual time=0.147..0.238 rows=300 loops=1)
+            -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=3.05 rows=3.13) (actual time=0.308..0.324 rows=3.33 loops=300)
+ |
 
 
 
@@ -334,6 +349,7 @@ create index IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC on GIANT_REF (GIA
 
 
 -- ソートありでカウント検索 => 速くなってる！
+-- o count(*)じゃなくて "select *" でも速い (1秒くらい: 表示の分も含まれてるだろうか？)
 select count(*)
   from GIANT_REF ref
     inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
@@ -348,7 +364,9 @@ select count(*)
 
 -- 範囲検索してascソート => gi側は変わらずUsing temporary; Using filesortだけどref側で複合インデックス使われてる
 -- o ref側にUsing indexが追加されいて、マシになったっぽい
--- o ただ、とにかくjoinがでかいか？ (別問題)
+-- o joinしてからsortなので最初の行にUsing temporary; Using filesortが表示されているけど...
+--   そのsortにピンポイント複合インデックスが利用されていると解釈できるのか？ (実際に速いので)
+-- o でもそれだったら、Using temporary; Using filesortが表示されて欲しくはないが...
 explain
 select gi.INDEX_INTEGER, ref.INDEX_DATETIME
   from GIANT_REF ref
@@ -362,11 +380,17 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 |  1 | SIMPLE      | ref   | NULL       | ref   | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER,IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | 8       | maihamadb.gi.GIANT_ID |     3 |   100.00 | Using index                                               |
 +----+-------------+-------+------------+-------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+-------+----------+-----------------------------------------------------------+
 2 rows in set, 1 warning (0.00 sec)
+| -> Sort: ref.INDEX_DATETIME  (actual time=78.2..79.4 rows=50619 loops=1)
+    -> Stream results  (cost=48494 rows=107639) (actual time=0.121..68.7 rows=50619 loops=1)
+        -> Nested loop inner join  (cost=48494 rows=107639) (actual time=0.115..60.7 rows=50619 loops=1)
+            -> Filter: (gi.INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.0375..8.68 rows=15000 loops=1)
+                -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (INDEX_INTEGER < 50)  (cost=6295 rows=31240) (actual time=0.0358..7.39 rows=15000 loops=1)
+            -> Covering index lookup on ref using IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC (GIANT_ID=gi.GIANT_ID)  (cost=1.01 rows=3.45) (actual time=0.00249..0.00313 rows=3.37 loops=15000)
+ |
 
 -- 等値条件してascソート => gi側は変わらずUsing temporary; Using filesortだけどref側で複合インデックス使われてる
--- o ref側にUsing indexが追加されいて、マシになったっぽい
--- o ただ、とにかくjoinがでかいか？ (別問題)
-explain
+-- o こちらも同じく、join後のsortでピンポイント複合インデックスが利用されているということか？ (実際に速いので)
+explain analyze
 select gi.INDEX_INTEGER, ref.INDEX_DATETIME
   from GIANT_REF ref
     inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
@@ -379,6 +403,12 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 |  1 | SIMPLE      | ref   | NULL       | ref  | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER,IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | 8       | maihamadb.gi.GIANT_ID |    3 |   100.00 | Using index                                  |
 +----+-------------+-------+------------+------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+------+----------+----------------------------------------------+
 2 rows in set, 1 warning (0.00 sec)
+| -> Sort: ref.INDEX_DATETIME  (actual time=3.45..3.51 rows=1000 loops=1)
+    -> Stream results  (cost=437 rows=1034) (actual time=0.0913..3.08 rows=1000 loops=1)
+        -> Nested loop inner join  (cost=437 rows=1034) (actual time=0.0856..2.8 rows=1000 loops=1)
+            -> Covering index lookup on gi using IX_GIANT_INDEX_INTEGER (INDEX_INTEGER=1)  (cost=31.4 rows=300) (actual time=0.0651..0.192 rows=300 loops=1)
+            -> Covering index lookup on ref using IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC (GIANT_ID=gi.GIANT_ID)  (cost=1.01 rows=3.45) (actual time=0.00706..0.00825 rows=3.33 loops=300)
+ |
 
 -- 一応desc => 変わらずUsing indexで良いのかな
 explain
@@ -394,6 +424,12 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 |  1 | SIMPLE      | ref   | NULL       | ref  | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER,IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC | 8       | maihamadb.gi.GIANT_ID |    3 |   100.00 | Using index                                  |
 +----+-------------+-------+------------+------+------------------------------------------------------------------------------------------+---------------------------------------------------+---------+-----------------------+------+----------+----------------------------------------------+
 2 rows in set, 1 warning (0.01 sec)
+| -> Sort: ref.INDEX_DATETIME DESC  (actual time=6.33..6.41 rows=1000 loops=1)
+    -> Stream results  (cost=421 rows=910) (actual time=0.165..5.84 rows=1000 loops=1)
+        -> Nested loop inner join  (cost=421 rows=910) (actual time=0.156..5.52 rows=1000 loops=1)
+            -> Covering index lookup on gi using IX_GIANT_INDEX_INTEGER (INDEX_INTEGER=1)  (cost=31.4 rows=300) (actual time=0.103..0.25 rows=300 loops=1)
+            -> Covering index lookup on ref using IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC (GIANT_ID=gi.GIANT_ID)  (cost=0.996 rows=3.03) (actual time=0.0158..0.0171 rows=3.33 loops=300)
+ |
 
 -- さっき遅かった検索がdescでも速くなっているのでdescでも問題ない
 select count(*)
@@ -412,6 +448,7 @@ select count(*)
 
 -- 元に戻そう
 drop index IX_RESEARCH_GIANT_REF_GIANT_ID_INDEX_DATETIME_ASC on GIANT_REF
+show index from GIANT_REF
  
  
  -- 途端に遅くなる (つまり複合インデックスは効果がある証拠)
