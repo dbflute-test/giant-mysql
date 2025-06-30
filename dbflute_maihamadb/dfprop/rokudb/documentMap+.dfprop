@@ -1,0 +1,36 @@
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o schemaHtmlFileName: (NotRequired - Default 'schema-[project-name].html')
+    #  The file name (not contain path) of SchemaHtml.
+    #  Basically you don't need this.
+    #  (For example, when you use Application Behavior, you need this)
+    #
+    # スキーマの確認もするかもなのでSchemaHTMLも生成するので名前を変えて区別しておく (2025/06/30)
+    ; schemaHtmlFileName = schema-maihamadb-rokudb.html
+    # - - - - - - - - - -/
+
+    # SchemaHTMLが直感的に区別できるようにデザインを少し変える (2025/06/30)
+    ; schemaHtmlStyleSheet = ./style-schema-rokudb.css
+    ; isSchemaHtmlStyleSheetInheritable = true
+
+    # SchemaHTML間を行き来できるようにするためにリンクを貼る (2025/06/30)
+    ; neighborhoodSchemaHtmlMap = map:{
+        ; maihamadb_home = map:{
+            ; path = ./schema-maihamadb.html
+        }
+    }
+
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o historyHtmlFileName: (NotRequired - Default 'history-[project-name].html')
+    #  The file name (not contain path) of HistoryHtml.
+    #  Basically you don't need this.
+    #  (For example, when you use Application Behavior, you need this)
+    #
+    # スキーマの履歴確認するかもなので名前を変えて区別しておく (2025/06/30)
+    ; historyHtmlFileName = history-maihamadb-rokudb.html
+    # - - - - - - - - - -/
+
+    # PropertiesHtmlのリンクが環境タイプのものに変わってしまうので、このenvでは生成しない(で別にいい) (2025/06/30)
+    # (既存のファイルが削除されなくなるわけではなく、生成処理が実行されなくなるだけ)
+    ; isSuppressPropertiesHtmlGenerateForcedly = true
+}

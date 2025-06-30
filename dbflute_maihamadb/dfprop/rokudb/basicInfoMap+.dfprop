@@ -1,0 +1,11 @@
+# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+#
+#  sync用の本番想定DB
+#
+# _/_/_/_/
+map:{
+    # sync側でもSchemaHTML生成するので、本体のSchemaXMLたちに迷惑掛けないように専用の名前にする。(2025/06/25)
+    ; projectSchemaXMLFilePath = ./schema/project-schema-maihamadb-rokudb.xml
+    ; projectSchemaHistoryDiffPieceEnvType = rokudb
+    ; projectSchemaHistoryFilePath = ./schema/project-history-maihamadb-rokudb.diffmap
+}

@@ -1,0 +1,11 @@
+map:{
+    # /- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # o repsEnvType: (NotRequired - Default inherits or 'ut')
+    #  The environment type of ReplaceSchema.
+    #   e.g. if ut, data files in './playsql/data/ut/...' are loaded
+    #  If DBFlute environment type is specified, inherits it as default.
+    #
+    # use same data as honke
+    ; repsEnvType = ut
+    # - - - - - - - - - -/
+}
