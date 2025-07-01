@@ -193,8 +193,39 @@ select count(0) AS `count(*)`
 
 -- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 -- (MySQL-8.0.36) => 変わらず速い
--- (もうここはあまり意味がないので詳細は省略)
+-- o 実行計画はまったく変わってない
+-- o analyzeで、Materialize with deduplication？
 -- _/_/_/_/
++----------+
+| count(*) |
++----------+
+|      152 |
++----------+
+1 row in set (0.06 sec)
++----+--------------+-------------+------------+--------+----------------------------------------------------------------+-------------------------+---------+----------------------+------+----------+-------------+
+| id | select_type  | table       | partitions | type   | possible_keys                                                  | key                     | key_len | ref                  | rows | filtered | Extra       |
++----+--------------+-------------+------------+--------+----------------------------------------------------------------+-------------------------+---------+----------------------+------+----------+-------------+
+|  1 | SIMPLE       | <subquery2> | NULL       | ALL    | NULL                                                           | NULL                    | NULL    | NULL                 | NULL |   100.00 | NULL        |
+|  1 | SIMPLE       | gi          | NULL       | eq_ref | PRIMARY                                                        | PRIMARY                 | 8       | <subquery2>.GIANT_ID |    1 |   100.00 | Using index |
+|  2 | MATERIALIZED | ref         | NULL       | ref    | IX_GIANT_REF_INDEX_DATE,IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | IX_GIANT_REF_INDEX_DATE | 3       | const                |  152 |   100.00 | NULL        |
++----+--------------+-------------+------------+--------+----------------------------------------------------------------+-------------------------+---------+----------------------+------+----------+-------------+
+3 rows in set, 1 warning (0.00 sec)
++-------+------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Level | Code | Message                                                                                                                                                                                                                                       |
++-------+------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Note  | 1003 | /* select#1 */
+select count(0) AS `count(*)`
+  from `maihamadb`.`giant` `gi`
+    semi join (`maihamadb`.`giant_ref` `ref`)
+ where ((`maihamadb`.`gi`.`GIANT_ID` = `<subquery2>`.`GIANT_ID`)
+   and (`maihamadb`.`ref`.`INDEX_DATE` = DATE'2000-01-01')) |
++-------+------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+ -> Aggregate: count(0)  (cost=216 rows=1) (actual time=3.28..3.28 rows=1 loops=1)
+    -> Nested loop inner join  (cost=201 rows=152) (actual time=1.98..3.26 rows=152 loops=1)
+        -> Table scan on <subquery2>  (cost=180..185 rows=152) (actual time=1.94..1.96 rows=152 loops=1)
+            -> Materialize with deduplication  (cost=180..180 rows=152) (actual time=1.94..1.94 rows=152 loops=1)
+                -> Index lookup on ref using IX_GIANT_REF_INDEX_DATE (INDEX_DATE=DATE'2000-01-01')  (cost=165 rows=152) (actual time=1.34..1.87 rows=152 loops=1)
+        -> Single-row covering index lookup on gi using PRIMARY (GIANT_ID=`<subquery2>`.GIANT_ID)  (cost=1.09 rows=1) (actual time=0.00827..0.00832 rows=1 loops=152)
 
 
 
@@ -328,13 +359,12 @@ select count(0) AS `count(*)`
    and (`maihamadb`.`gi`.`INDEX_INTEGER` < 100) and (`maihamadb`.`ref`.`INDEX_DATE` >= DATE'2024-03-21')) |
 +-------+------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 2 rows in set (0.00 sec)
-| -> Aggregate: count(0)  (cost=5702 rows=1) (actual time=19.3..19.3 rows=1 loops=1)
+ -> Aggregate: count(0)  (cost=5702 rows=1) (actual time=19.3..19.3 rows=1 loops=1)
     -> Nested loop semijoin  (cost=5460 rows=2420) (actual time=0.12..19.3 rows=1417 loops=1)
         -> Filter: ((gi.INDEX_INTEGER >= 95) and (gi.INDEX_INTEGER < 100))  (cost=303 rows=1500) (actual time=0.0365..0.627 rows=1500 loops=1)
             -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (95 <= INDEX_INTEGER < 100)  (cost=303 rows=1500) (actual time=0.034..0.457 rows=1500 loops=1)
         -> Filter: (ref.INDEX_DATE >= DATE'2024-03-21')  (cost=5.03 rows=1.61) (actual time=0.0123..0.0123 rows=0.945 loops=1500)
             -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=5.03 rows=3.23) (actual time=0.0121..0.0122 rows=1.07 loops=1500)
- |
 
 
 
@@ -431,11 +461,56 @@ select count(0) AS `count(*)`
    and (`maihamadb`.`ref`.`INDEX_DATE` >= DATE'2024-03-21')) |
 +-------+------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
 1 row in set (0.00 sec)
-| -> Aggregate: count(0)  (cost=5702 rows=1) (actual time=22.5..22.5 rows=1 loops=1)
+ -> Aggregate: count(0)  (cost=5702 rows=1) (actual time=22.5..22.5 rows=1 loops=1)
     -> Nested loop semijoin  (cost=5460 rows=2420) (actual time=0.104..22.4 rows=1417 loops=1)
         -> Filter: ((gi.INDEX_INTEGER >= 95) and (gi.INDEX_INTEGER < 100))  (cost=303 rows=1500) (actual time=0.0408..0.646 rows=1500 loops=1)
             -> Covering index range scan on gi using IX_GIANT_INDEX_INTEGER over (95 <= INDEX_INTEGER < 100)  (cost=303 rows=1500) (actual time=0.0386..0.47 rows=1500 loops=1)
         -> Filter: (ref.INDEX_DATE >= DATE'2024-03-21')  (cost=5.03 rows=1.61) (actual time=0.0144..0.0144 rows=0.945 loops=1500)
             -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=5.03 rows=3.23) (actual time=0.0142..0.0142 rows=1.07 loops=1500)
- |
+
+
+-- _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+-- (MySQL-8.0.36) で order by + limit => 変わらず速い
+-- o 実行計画はほとんど (FirstMatch, semi join)
+-- o Using filesortは入る (これはしょうがない)
+-- _/_/_/_/
+
+select gi.GIANT_ID, gi.GIANT_STATUS_CODE
+  from GIANT gi
+ where gi.GIANT_ID in (select ref.GIANT_ID
+                         from GIANT_REF ref
+                        where ref.INDEX_DATE >= '2024-03-21'
+       )
+   and gi.INDEX_INTEGER >= 95
+   and gi.INDEX_INTEGER < 100
+ order by gi.INDEX_DATETIME
+ limit 20
++----+-------------+-------+------------+-------+----------------------------------------------------------------+----------------------------------------+---------+-----------------------+------+----------+---------------------------------------+
+| id | select_type | table | partitions | type  | possible_keys                                                  | key                                    | key_len | ref                   | rows | filtered | Extra                                 |
++----+-------------+-------+------------+-------+----------------------------------------------------------------+----------------------------------------+---------+-----------------------+------+----------+---------------------------------------+
+|  1 | SIMPLE      | gi    | NULL       | range | PRIMARY,IX_GIANT_INDEX_INTEGER                                 | IX_GIANT_INDEX_INTEGER                 | 4       | NULL                  | 1500 |   100.00 | Using index condition; Using filesort |
+|  1 | SIMPLE      | ref   | NULL       | ref   | IX_GIANT_REF_INDEX_DATE,IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER | 8       | maihamadb.gi.GIANT_ID |    3 |    50.00 | Using where; FirstMatch(gi)           |
++----+-------------+-------+------------+-------+----------------------------------------------------------------+----------------------------------------+---------+-----------------------+------+----------+---------------------------------------+
+2 rows in set, 1 warning (0.00 sec)
++-------+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Level | Code | Message                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
++-------+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Note  | 1003 | /* select#1 */
+select `maihamadb`.`gi`.`GIANT_ID` AS `GIANT_ID`,`maihamadb`.`gi`.`GIANT_STATUS_CODE` AS `GIANT_STATUS_CODE`
+  from `maihamadb`.`giant` `gi`
+    semi join (`maihamadb`.`giant_ref` `ref`)
+ where ((`maihamadb`.`ref`.`GIANT_ID` = `maihamadb`.`gi`.`GIANT_ID`)
+   and (`maihamadb`.`gi`.`INDEX_INTEGER` >= 95)
+   and (`maihamadb`.`gi`.`INDEX_INTEGER` < 100)
+   and (`maihamadb`.`ref`.`INDEX_DATE` >= DATE'2024-03-21'))
+ order by `maihamadb`.`gi`.`INDEX_DATETIME`
+ limit 20
+|
++-------+------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+ -> Limit: 20 row(s)  (cost=7046 rows=20) (actual time=11.4..12.3 rows=20 loops=1)
+    -> Nested loop semijoin  (cost=7046 rows=2420) (actual time=11.4..12.3 rows=20 loops=1)
+        -> Sort: gi.INDEX_DATETIME  (cost=1789 rows=1500) (actual time=11.2..11.2 rows=20 loops=1)
+            -> Index range scan on gi using IX_GIANT_INDEX_INTEGER over (95 <= INDEX_INTEGER < 100), with index condition: ((gi.INDEX_INTEGER >= 95) and (gi.INDEX_INTEGER < 100))  (cost=1789 rows=1500) (actual time=0.114..10.6 rows=1500 loops=1)
+        -> Filter: (ref.INDEX_DATE >= DATE'2024-03-21')  (cost=5.13 rows=1.61) (actual time=0.0524..0.0524 rows=1 loops=20)
+            -> Index lookup on ref using IX_GIANT_REF_COMPOUND_GIANT_ID_INTEGER (GIANT_ID=gi.GIANT_ID)  (cost=5.13 rows=3.23) (actual time=0.052..0.052 rows=1 loops=20)
 
