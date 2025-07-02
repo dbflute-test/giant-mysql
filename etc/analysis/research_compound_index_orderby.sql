@@ -61,7 +61,10 @@ select count(*)
 -- ---------------------------------------------------------
 --                               ピンポイント複合インデックスなし
 --                               ---------------------------
--- ascのまま => Using MRR; Using filesort
+-- ascのまま => 遅い、Using MRR; Using filesort
+-- Using MRR (Multi-Range Read) は、範囲インデックス検索でヒット件数が多いときのランダム順序アクセスの繰り返すを軽減する。
+-- MRR が出るってことは件数多過ぎるよってことだが、テーブルスキャンなるよりはマシということ。
+-- Using filesort は、メモリ上でのクイックソートのこと。つまり、普通にソート処理してるマークってことで良い。
 -- explain analyze (実際に実行) で想定通り3秒掛かっている
 explain
 select *
@@ -81,8 +84,8 @@ select *
 1 row in set (3.17 sec)
 
 
--- descにしてみた => 変わらずUsing MRR; Using filesort
-explain analyze
+-- descにしてみた => 変わらず遅いし、変わらず Using MRR; Using filesort
+explain
 select *
   from GIANT_REF ref
  where ref.INDEX_INTEGER < 50
@@ -100,8 +103,7 @@ select *
 1 row in set (2.71 sec)
 
 
--- もっと絞ってみた => 変わらずUsing MRR; Using filesort
--- 件数減ったからまあ実行自体は速いは速いが、analyze見るとSortはちゃんとしている
+-- もっと絞ってみた => 絞ったから速い、変わらず Using MRR; Using filesort
 explain
 select *
   from GIANT_REF ref
@@ -120,7 +122,9 @@ select *
 1 row in set (0.06 sec)
 
 
--- 等値条件にしてみた => 件数少ないけどUsing filesort
+-- 等値条件にしてみた => さらに絞ったからさらに速い、Using filesort のみ
+-- o 範囲検索ではないから Using MRR は消えた。
+-- o Using filesort, まあ普通にソート処理はしてるってこと。
 explain
 select *
   from GIANT_REF ref
@@ -148,8 +152,11 @@ select *
 create index IX_RESEARCH_GIANT_REF_INDEX_INTEGER_INDEX_DATETIME_ASC on GIANT_REF (INDEX_INTEGER, INDEX_DATETIME)
 
 
--- ascのまま => ピンポイント複合インデックスは使われてるけど、Using MRR; Using filesort
--- o 件数が多すぎてUsing MRRが必要になってfilesortが必要？MRRとfilesortの関連性は？
+-- ascでの検索 => スピード変わってない、ピンポイント複合インデックスは使われてるけど、Using MRR; Using filesort
+-- o 件数が多い範囲検索だからやはり Using MRR は出る。
+-- o Using filesort が出てるってことは、ピンポイント複合インデックスでソートを賄えているわけじゃない。
+-- o ピンポイント複合インデックスないときに比べて実行速度も変わらない。
+-- o ピンポイント複合インデックスは単に絞り込みにだけ使われているだけっぽい。
 explain
 select *
   from GIANT_REF ref
@@ -168,9 +175,10 @@ select *
 1 row in set (2.80 sec)
 
 
--- もっと絞ってみた => Using MRRは消えたが、Using filesortが残る
--- o 件数が減ったことでMRRする必要はなくなったけどfilesortが必要？ (よくわからないので要調査)
-explain analyze
+-- もっと絞ってみた => 絞ったから速い、でも Using MRR は消えた、でも Using filesort は残る
+-- o ピンポイント複合インデックスなしの同じSQLに比べて、MRRが消えたので何かしら良い影響はある？
+-- o ソートがあるのは変わらない。
+explain
 select *
   from GIANT_REF ref
  where ref.INDEX_INTEGER < 5
@@ -188,9 +196,11 @@ select *
 1 row in set (0.03 sec)
 
 
--- 等値条件にしてみた => ピンポイント複合インデックスが使われてる、Using filesort消えた！
--- o 元々等値条件のときに Using filesort あったので効果ある
+-- 等値条件にしてみた => ピンポイント複合インデックスが使われて、Using filesort が消えた！
+-- o explain から Using filesort が消えた！
 -- o explain analyze から sort が消えた！
+-- o ピンポイント複合インデックスなしの同じSQLのときも(そもそも件数が少ないから)実行時間はそんな掛かってないのであまり変わらないが...
+-- o 論理的に処理を省略できているのでチリも積もればレベルのチューニングはできていると言えそう。(actual time: 7.19 => 5.76)
 explain
 select *
   from GIANT_REF ref
@@ -208,10 +218,11 @@ select *
 1 row in set (0.01 sec)
 
 
-
-
--- 等値条件のdesc => 複合インデックスが使われた、Backward index scan
--- o Backwardするけど効果ありそう
+-- 等値条件のdesc => 変わらず複合インデックスが使われてsortがない、ただし Backward index scan !?
+-- o sortは省略できてるので、複合インデックスの効果はありそう...!?
+-- o と思ったけど、actual time見ると複合インデックスなしのときにと同じくらい掛かってるので、複合インデックス自体の効果が薄いかも？
+-- o Backward で大変になるってことではなく元に戻るくらいっぽいけど、狙うなら Backward なし状態かな。
+-- o 時々の逆順でも遅くなるわけじゃないのすべり止めくらいに考えたほうが良いのかも。(なんなら actual time だけ見ると逆に1ミリ秒遅い)
 explain
 select *
   from GIANT_REF ref
@@ -253,10 +264,10 @@ select count(*)
 +----------+
 |   500815 |
 +----------+
-1 row in set (3.78 sec)
+1 row in set (6.11 sec)
 
 
--- 等値条件でも大量レコード (ピンポイント複合インデックスなし) => Using filesort
+-- 等値条件でも大量レコード (ピンポイント複合インデックスなし) => 遅い、Using filesort
 explain
 select *
   from GIANT_REF ref
@@ -268,11 +279,11 @@ select *
 |  1 | SIMPLE      | ref   | NULL       | ref  | FK_GIANT_REF_ZONE_MEMBER | FK_GIANT_REF_ZONE_MEMBER | 4       | const | 1024530 |   100.00 | Using filesort |
 +----+-------------+-------+------------+------+--------------------------+--------------------------+---------+-------+---------+----------+----------------+
 1 row in set, 1 warning (0.01 sec)
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| -> Sort: ref.INDEX_DATETIME  (cost=407697 rows=1.02e+6) (actual time=5592..5687 rows=500815 loops=1)
-    -> Index lookup on ref using FK_GIANT_REF_ZONE_MEMBER (ZONE_MEMBER_ID=1)  (cost=407697 rows=1.02e+6) (actual time=4.6..5115 rows=500815 loops=1)
-+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-1 row in set (5.84 sec)
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| -> Sort: ref.INDEX_DATETIME  (cost=393551 rows=1.02e+6) (actual time=4551..4646 rows=500815 loops=1)
+    -> Index lookup on ref using FK_GIANT_REF_ZONE_MEMBER (ZONE_MEMBER_ID=1)  (cost=393551 rows=1.02e+6) (actual time=6.79..4096 rows=500815 loops=1)
++-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (4.80 sec) -- ← 5秒超えるときもあった
 
 
 -- ascのピンポイント複合インデックスを貼ってみる
@@ -280,8 +291,10 @@ select *
 create index IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC on GIANT_REF (ZONE_MEMBER_ID, INDEX_DATETIME)
 
 
--- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => ピンポイント複合インデックスが使われてる、Using filesortない！
--- o 等値条件なら大量レコードになってもピンポイント複合インデックスの効果はあると言えそう
+-- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => 少し速くなった！ (1秒〜2秒速くなった)
+-- o ピンポイント複合インデックスが使われてる、Using filesortない！
+-- o 等値条件なら大量レコードになってもピンポイント複合インデックスの効果はあると言えそう。
+-- o とはいえ、そもそも大量件数を取り出す処理は省略できないから、これ以上は速くならなさそう。
 explain
 select *
   from GIANT_REF ref
@@ -292,12 +305,17 @@ select *
 +----+-------------+-------+------------+------+---------------------------------------------------------+---------------------------------------------------------+---------+-------+---------+----------+-------+
 |  1 | SIMPLE      | ref   | NULL       | ref  | IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC | IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC | 4       | const | 1064018 |   100.00 | NULL  |
 +----+-------------+-------+------------+------+---------------------------------------------------------+---------------------------------------------------------+---------+-------+---------+----------+-------+
-1 row in set, 1 warning (0.01 sec)
-| -> Index lookup on ref using IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC (ZONE_MEMBER_ID=1)  (cost=413984 rows=1.06e+6) (actual time=25.5..18586 rows=500815 loops=1)
--- ↑ここanalyzeの実行時間をコピーするの忘れた... (やり直すのも大変だし)
--- ↓なので、count(*)に変えたパターンで比較、遅かったので速くなってるので効果大きい
+1 row in set, 1 warning (0.00 sec)
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| -> Index lookup on ref using IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC (ZONE_MEMBER_ID=1)  (cost=397337 rows=1.06e+6) (actual time=3.41..2810 rows=500815 loops=1)
++-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+1 row in set (2.96 sec)
+1 row in set (2.76 sec)
+1 row in set (2.74 sec)
 
--- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => 速くなった！
+
+-- 等値条件でも大量レコード (ピンポイント複合インデックス貼ってみた) => がっつり速くなった！
+-- o データ取得処理がないから0秒台になるのだと思われる。
 select count(*)
   from GIANT_REF ref
  where ref.ZONE_MEMBER_ID = 1
@@ -317,6 +335,18 @@ select *
  limit 10000
 ...
 10000 rows in set (0.21 sec)
+10000 rows in set (0.09 sec)
+10000 rows in set (0.09 sec)
+
+-- 30万とかにすると掛かってきたので、さっきの50万の select * で3秒はそういうことかなと
+select *
+  from GIANT_REF ref
+ where ref.ZONE_MEMBER_ID = 1
+ order by ref.INDEX_DATETIME asc
+ limit 300000
+...
+300000 rows in set (1.78 sec)
+
 
 
 -- 元に戻そう...と思ったら needed in a foreign key constraint で消せない!?
@@ -327,6 +357,7 @@ alter table GIANT_REF drop foreign key FK_GIANT_REF_ZONE_MEMBER
 drop index IX_RESEARCH_GIANT_REF_ZONE_MEMBER_ID_INDEX_DATETIME_ASC on GIANT_REF
 
 -- これめっちゃ時間掛かる (1 hour 20 min 26.17 sec)
+-- あれ？ (28 min 17.31 sec) で終わったときもあるぞ。
 alter table GIANT_REF add constraint FK_GIANT_REF_ZONE_MEMBER
 	foreign key (ZONE_MEMBER_ID) references MEMBER (MEMBER_ID)
 
@@ -483,7 +514,7 @@ select gi.INDEX_INTEGER, ref.INDEX_DATETIME
 
 -- 等値条件してascソート => gi側は変わらずUsing temporary; Using filesortだけどref側で複合インデックス使われてる
 -- o こちらも同じく、join後のsortでピンポイント複合インデックスが利用されているということか？ (実際に速いので)
-explain analyze
+explain
 select gi.INDEX_INTEGER, ref.INDEX_DATETIME
   from GIANT_REF ref
     inner join GIANT gi on ref.GIANT_ID = gi.GIANT_ID
